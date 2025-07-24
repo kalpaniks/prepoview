@@ -1,0 +1,29 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+        
+model User{
+    id   String   @id @default(cuid())
+    githubId String @unique
+    email String?
+    accessToken String 
+    createdAt DateTime @default(now())
+    shares Share[]
+}
+
+model Share{
+    id String @id @default(cuid())
+    userId  String 
+    repoOwner String
+    repoName String
+    shareId String @unique @default(cuid())
+    createdAt DateTime @default(now())
+    user User   @relation(fields: [userId], references: [id])
+}

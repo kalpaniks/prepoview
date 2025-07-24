@@ -1,5 +1,5 @@
 {
-  "name": "github-readonly-share",
+  "name": "prepoview",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,8 +10,10 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
     "@prisma/client": "^6.12.0",
     "@tailwindcss/forms": "^0.5.10",
+    "crypto": "^1.0.1",
     "monaco-editor": "^0.52.2",
     "next": "15.4.3",
     "next-auth": "^4.24.11",
