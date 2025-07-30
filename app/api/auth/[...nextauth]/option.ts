@@ -1,24 +1,21 @@
 import { NextAuthOptions } from 'next-auth';
 import GitHubProvider from 'next-auth/providers/github';
 import { prisma } from '@/lib/prisma';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { encrypt } from '@/lib/crypto';
+import { EncryptedPrismaAdapter } from '@/lib/adapter';
+import { Adapter } from 'next-auth/adapters';
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: EncryptedPrismaAdapter(prisma) as Adapter,
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
+  session: {
+    strategy: 'jwt',
+  },
   callbacks: {
-    async signIn({ account }) {
-      if (account?.access_token) {
-        account.access_token = encrypt(account.access_token);
-      }
-      return true;
-    },
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;
@@ -26,8 +23,10 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token?.sub) session.user.id = token.sub;
-      session.accessToken = token.accessToken as string | undefined;
+      if (token?.sub) {
+        session.user.id = token.sub;
+        session.accessToken = token.accessToken as string | undefined;
+      }
       return session;
     },
   },
