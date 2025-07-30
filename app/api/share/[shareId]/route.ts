@@ -19,7 +19,6 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { shareId: string } }
 ): Promise<NextResponse> {
-
   const { shareId } = params;
   const shareDetails = await getShareDetails(shareId);
   if (!shareDetails) {
@@ -27,6 +26,6 @@ export async function GET(
   }
   return NextResponse.json(
     { repoName: shareDetails.repoName, repoOwner: shareDetails.repoOwner },
-    { status: 200 },
+    { status: 200 }
   );
 }

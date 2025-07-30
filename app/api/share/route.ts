@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
-
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { getSession } from '@/lib/auth';
 
 /*
 type Share{
@@ -14,28 +13,27 @@ type Share{
 }
 */
 
-async function createShare(repoName : string, repoOwner : string, userId : string) : Promise<string> {
-    const shareId = await prisma.share.create({
-        data : {
-            repoName : repoName,
-            repoOwner : repoOwner,
-            createdAt : new Date(),
-            user : {
-                connect : {
-                    id : userId
-                }
-            }
-        }
-    });
-    return shareId.id;
+async function createShare(repoName: string, repoOwner: string, userId: string): Promise<string> {
+  const shareId = await prisma.share.create({
+    data: {
+      repoName: repoName,
+      repoOwner: repoOwner,
+      createdAt: new Date(),
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+    },
+  });
+  return shareId.id;
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-
   const session = await getSession();
 
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { repoName, repoOwner } = await request.json();
   const shareId = await createShare(repoName, repoOwner, session.user.id);
