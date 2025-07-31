@@ -108,7 +108,7 @@ export async function getDecryptedTokensForUser(
   prisma: PrismaClient,
   userId: string,
   provider: string
-): Promise<{ access_token?: string; refresh_token?: string } | null> {
+): Promise<{ access_token?: string } | null> {
   const account = await prisma.account.findFirst({
     where: {
       userId,
@@ -118,21 +118,13 @@ export async function getDecryptedTokensForUser(
 
   if (!account) return null;
 
-  const tokens: { access_token?: string; refresh_token?: string } = {};
+  const tokens: { access_token?: string } = {};
 
   if (account.access_token) {
     try {
       tokens.access_token = decrypt(account.access_token);
     } catch (error) {
       console.error('Failed to decrypt access_token:', error);
-    }
-  }
-
-  if (account.refresh_token) {
-    try {
-      tokens.refresh_token = decrypt(account.refresh_token);
-    } catch (error) {
-      console.error('Failed to decrypt refresh_token:', error);
     }
   }
 
