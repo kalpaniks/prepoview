@@ -1,4 +1,4 @@
-import * as z from "zod";
+import * as z from 'zod';
 
 const fileResponseSchema = z.object({
   content: z.string().base64(),

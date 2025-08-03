@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import prisma from '@/lib/prisma';
 
 export async function getTree(
   repoName: string,
@@ -53,5 +53,3 @@ export async function getFile(
   );
   return response.json();
 }
-
-
