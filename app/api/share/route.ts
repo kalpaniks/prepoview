@@ -36,6 +36,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { repoName, repoOwner } = await request.json();
+  if (!repoName || !repoOwner) {
+    return NextResponse.json({ error: 'Repo name and repo owner are required' }, { status: 400 });
+  }
   const shareId = await createShare(repoName, repoOwner, session.user.id);
 
   return NextResponse.json({ shareId }, { status: 201 });

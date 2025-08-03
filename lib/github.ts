@@ -1,4 +1,11 @@
-export async function getTree(repoName: string, repoOwner: string, accessToken: string) {
+import prisma from "@/lib/prisma";
+
+export async function getTree(
+  repoName: string,
+  repoOwner: string,
+  accessToken: string,
+  branch: string = 'main'
+) {
   const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -13,11 +20,14 @@ export async function getTree(repoName: string, repoOwner: string, accessToken: 
   const repoData = await repoResponse.json();
   const defaultBranch = repoData.default_branch;
 
-  const treeResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/git/trees/${defaultBranch}?recursive=1`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const treeResponse = await fetch(
+    `https://api.github.com/repos/${repoOwner}/${repoName}/git/trees/${defaultBranch}?recursive=1`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
 
   if (!treeResponse.ok) {
     const errorData = await treeResponse.json();
@@ -27,11 +37,21 @@ export async function getTree(repoName: string, repoOwner: string, accessToken: 
   return treeResponse.json();
 }
 
-export async function getFile(repoName: string, repoOwner: string, accessToken: string, filePath: string) {
-  const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+export async function getFile(
+  repoName: string,
+  repoOwner: string,
+  accessToken: string,
+  filePath: string
+) {
+  const response = await fetch(
+    `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
   return response.json();
 }
+
+
