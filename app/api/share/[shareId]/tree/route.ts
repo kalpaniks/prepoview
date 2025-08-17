@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getShareDetails } from '@/lib/share';
-import { getBaseTree, getTree, transformGitHubTreeToNested } from '@/lib/github';
+import { getBaseTree } from '@/lib/github';
 import { getDecryptedTokensForUser } from '@/lib/adapter';
 import prisma from '@/lib/prisma';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ shareId: string }> }) {
   const { shareId } = await params;
   const branch = req.nextUrl.searchParams.get('branch');
+  const directoryPath = req.nextUrl.searchParams.get('path'); 
 
   if (!shareId) {
     return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
@@ -21,24 +22,70 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
       return NextResponse.json({ error: 'Access token not found' }, { status: 400 });
     }
 
-    // Get flat tree from GitHub API
-    // const githubTreeResponse = await getTree(
-    //   share.repoName,
-    //   share.repoOwner,
-    //   accessToken.access_token,
-    //   defaultBranch
-    // );
-    const githubTreeResponse = await getBaseTree(
-      share.repoName,
-      share.repoOwner,
-      accessToken.access_token
-    );
-    // Transform flat structure to nested tree
-    // const nestedTree = transformGitHubTreeToNested(githubTreeResponse.tree);
+    let githubTreeResponse;
 
-    return NextResponse.json(githubTreeResponse);
+    if (directoryPath) {
+      githubTreeResponse = await fetchDirectoryContents(
+        share.repoName,
+        share.repoOwner,
+        accessToken.access_token,
+        directoryPath
+      );
+    } else {
+      githubTreeResponse = await getBaseTree(
+        share.repoName,
+        share.repoOwner,
+        accessToken.access_token
+      );
+    }
+    const transformedData = githubTreeResponse.map((item: any) => ({
+      name: item.name,
+      path: item.path,
+      type: item.type === 'file' ? 'file' : 'dir',
+      sha: item.sha,
+    }));
+
+    return NextResponse.json(transformedData);
   } catch (error) {
     console.error('Error fetching repository tree:', error);
-    return NextResponse.json({ error: 'Failed to fetch repository tree' }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch repository tree',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
+}
+
+async function fetchDirectoryContents(
+  repoName: string,
+  repoOwner: string,
+  accessToken: string,
+  directoryPath: string
+) {
+  const encodedPath = encodeURIComponent(directoryPath);
+  const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${encodedPath}`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/vnd.github.v3+json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      `GitHub API error: ${response.status} - ${errorData.message || response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+
+  if (!Array.isArray(data)) {
+    throw new Error('Expected directory contents to be an array');
+  }
+
+  return data;
 }

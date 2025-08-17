@@ -1,0 +1,42 @@
+'use client';
+import { useState } from 'react';
+import EditorFileTree from './EditorFileTree';
+import Editor from './EditorFileView';
+
+interface EditorViewLayoutProps {
+  shareData: {
+    shareId: string;
+    repoName: string;
+    repoOwner: string;
+    fileCount: number;
+  };
+}
+
+export default function EditorViewLayout({ shareData }: EditorViewLayoutProps) {
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
+  const handleFileSelect = (filePath: string) => {
+    console.log('📁 Layout: File selected:', filePath);
+    setSelectedFile(filePath);
+  };
+
+  return (
+    <div className="flex h-full" style={{ backgroundColor: 'var(--bgColor-muted)' }}>
+      {/* Left sidebar - File tree */}
+      <div className="w-80 flex-shrink-0">
+        <EditorFileTree onFileSelect={handleFileSelect} selectedFile={selectedFile} />
+      </div>
+
+      {/* Right side - Code editor */}
+      <div
+        className="min-w-0 flex-1 shadow-sm"
+        style={{
+          borderLeft: '1px solid var(--borderColor-default)',
+          backgroundColor: 'var(--bgColor-default)',
+        }}
+      >
+        <Editor shareId={shareData.shareId} selectedFile={selectedFile} />
+      </div>
+    </div>
+  );
+}

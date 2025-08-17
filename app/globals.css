@@ -43,73 +43,215 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* GitHub Primer-inspired color system with automatic dark mode */
 :root {
+  /* Inform browser that both light and dark themes are supported */
+  color-scheme: light dark;
+
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* === LIGHT THEME - GitHub-inspired colors === */
+
+  /* Background colors */
+  --bgColor-default: #ffffff;
+  --bgColor-muted: #f6f8fa;
+  --bgColor-subtle: #f1f3f6;
+  --bgColor-emphasis: #1f2328;
+  --bgColor-inset: #f6f8fa;
+
+  /* Foreground/text colors */
+  --fgColor-default: #1f2328;
+  --fgColor-muted: #59636e;
+  --fgColor-subtle: #8b949e;
+  --fgColor-onEmphasis: #ffffff;
+  --fgColor-accent: #0969da;
+  --fgColor-success: #1a7f37;
+  --fgColor-danger: #d1242f;
+  --fgColor-warning: #9a6700;
+
+  /* Border colors */
+  --borderColor-default: #d1d9e0;
+  --borderColor-muted: rgba(209, 217, 224, 0.7);
+  --borderColor-subtle: rgba(209, 217, 224, 0.4);
+  --borderColor-emphasis: #818b98;
+  --borderColor-accent: #0969da;
+  --borderColor-success: #1a7f37;
+  --borderColor-danger: #d1242f;
+  --borderColor-warning: #9a6700;
+
+  /* Shadows */
+  --shadow-small: 0 1px 0 rgba(31, 35, 40, 0.04);
+  --shadow-medium: 0 3px 6px rgba(31, 35, 40, 0.15);
+  --shadow-large: 0 8px 24px rgba(31, 35, 40, 0.2);
+
+  /* Legacy support for existing Tailwind setup */
+  --background: var(--bgColor-default);
+  --foreground: var(--fgColor-default);
+  --card: var(--bgColor-default);
+  --card-foreground: var(--fgColor-default);
+  --popover: var(--bgColor-default);
+  --popover-foreground: var(--fgColor-default);
+  --primary: #1f883d;
+  --primary-foreground: #ffffff;
+  --secondary: var(--bgColor-muted);
+  --secondary-foreground: var(--fgColor-default);
+  --muted: var(--bgColor-muted);
+  --muted-foreground: var(--fgColor-muted);
+  --accent: var(--bgColor-muted);
+  --accent-foreground: var(--fgColor-default);
+  --destructive: var(--fgColor-danger);
+  --border: var(--borderColor-default);
+  --input: var(--borderColor-default);
+  --ring: var(--borderColor-accent);
+  --chart-1: #0ea5e9;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
+  --sidebar: var(--bgColor-default);
+  --sidebar-foreground: var(--fgColor-default);
+  --sidebar-primary: #1f883d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--bgColor-muted);
+  --sidebar-accent-foreground: var(--fgColor-default);
+  --sidebar-border: var(--borderColor-default);
+  --sidebar-ring: var(--borderColor-accent);
 }
 
+/* === DARK THEME - GitHub's authentic dark colors === */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Background colors - GitHub's dark theme palette */
+    --bgColor-default: #0d1117;
+    --bgColor-muted: #161b22;
+    --bgColor-subtle: #21262d;
+    --bgColor-emphasis: #f0f6fc;
+    --bgColor-inset: #010409;
+
+    /* Foreground/text colors */
+    --fgColor-default: #f0f6fc;
+    --fgColor-muted: #8b949e;
+    --fgColor-subtle: #6e7681;
+    --fgColor-onEmphasis: #0d1117;
+    --fgColor-accent: #2f81f7;
+    --fgColor-success: #3fb950;
+    --fgColor-danger: #f85149;
+    --fgColor-warning: #d29922;
+
+    /* Border colors */
+    --borderColor-default: #30363d;
+    --borderColor-muted: rgba(48, 54, 61, 0.7);
+    --borderColor-subtle: rgba(48, 54, 61, 0.4);
+    --borderColor-emphasis: #6e7681;
+    --borderColor-accent: #2f81f7;
+    --borderColor-success: #3fb950;
+    --borderColor-danger: #f85149;
+    --borderColor-warning: #d29922;
+
+    /* Shadows */
+    --shadow-small: 0 0 0 1px rgba(240, 246, 252, 0.1);
+    --shadow-medium: 0 3px 6px rgba(0, 0, 0, 0.3);
+    --shadow-large: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+    /* Legacy support updates for dark mode */
+    --background: var(--bgColor-default);
+    --foreground: var(--fgColor-default);
+    --card: var(--bgColor-subtle);
+    --card-foreground: var(--fgColor-default);
+    --popover: var(--bgColor-subtle);
+    --popover-foreground: var(--fgColor-default);
+    --primary: #3fb950;
+    --primary-foreground: #0d1117;
+    --secondary: var(--bgColor-muted);
+    --secondary-foreground: var(--fgColor-default);
+    --muted: var(--bgColor-muted);
+    --muted-foreground: var(--fgColor-muted);
+    --accent: var(--bgColor-muted);
+    --accent-foreground: var(--fgColor-default);
+    --destructive: var(--fgColor-danger);
+    --border: var(--borderColor-default);
+    --input: var(--borderColor-default);
+    --ring: var(--borderColor-accent);
+    --sidebar: var(--bgColor-default);
+    --sidebar-foreground: var(--fgColor-default);
+    --sidebar-primary: #3fb950;
+    --sidebar-primary-foreground: #0d1117;
+    --sidebar-accent: var(--bgColor-muted);
+    --sidebar-accent-foreground: var(--fgColor-default);
+    --sidebar-border: var(--borderColor-default);
+    --sidebar-ring: var(--borderColor-accent);
+  }
+
+  /* Make images slightly dimmer in dark mode for better eye comfort */
+  img {
+    filter: brightness(0.9);
+  }
+}
+
+/* Manual dark mode override (for testing or user toggle) */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  color-scheme: dark;
+
+  /* Same dark colors as media query above */
+  --bgColor-default: #0d1117;
+  --bgColor-muted: #161b22;
+  --bgColor-subtle: #21262d;
+  --bgColor-emphasis: #f0f6fc;
+  --bgColor-inset: #010409;
+
+  --fgColor-default: #f0f6fc;
+  --fgColor-muted: #8b949e;
+  --fgColor-subtle: #6e7681;
+  --fgColor-onEmphasis: #0d1117;
+  --fgColor-accent: #2f81f7;
+  --fgColor-success: #3fb950;
+  --fgColor-danger: #f85149;
+  --fgColor-warning: #d29922;
+
+  --borderColor-default: #30363d;
+  --borderColor-muted: rgba(48, 54, 61, 0.7);
+  --borderColor-subtle: rgba(48, 54, 61, 0.4);
+  --borderColor-emphasis: #6e7681;
+  --borderColor-accent: #2f81f7;
+  --borderColor-success: #3fb950;
+  --borderColor-danger: #f85149;
+  --borderColor-warning: #d29922;
+
+  --shadow-small: 0 0 0 1px rgba(240, 246, 252, 0.1);
+  --shadow-medium: 0 3px 6px rgba(0, 0, 0, 0.3);
+  --shadow-large: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  /* Legacy support updates */
+  --background: var(--bgColor-default);
+  --foreground: var(--fgColor-default);
+  --card: var(--bgColor-subtle);
+  --card-foreground: var(--fgColor-default);
+  --popover: var(--bgColor-subtle);
+  --popover-foreground: var(--fgColor-default);
+  --primary: #3fb950;
+  --primary-foreground: #0d1117;
+  --secondary: var(--bgColor-muted);
+  --secondary-foreground: var(--fgColor-default);
+  --muted: var(--bgColor-muted);
+  --muted-foreground: var(--fgColor-muted);
+  --accent: var(--bgColor-muted);
+  --accent-foreground: var(--fgColor-default);
+  --destructive: var(--fgColor-danger);
+  --border: var(--borderColor-default);
+  --input: var(--borderColor-default);
+  --ring: var(--borderColor-accent);
+  --sidebar: var(--bgColor-default);
+  --sidebar-foreground: var(--fgColor-default);
+  --sidebar-primary: #3fb950;
+  --sidebar-primary-foreground: #0d1117;
+  --sidebar-accent: var(--bgColor-muted);
+  --sidebar-accent-foreground: var(--fgColor-default);
+  --sidebar-border: var(--borderColor-default);
+  --sidebar-ring: var(--borderColor-accent);
+}
+
+.dark img {
+  filter: brightness(0.9);
 }
 
 @layer base {
@@ -119,4 +261,28 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* === PROFESSIONAL THEME-AWARE CSS UTILITIES === */
+
+/* Navigation tab hover states - GitHub style */
+.nav-tab-inactive {
+  color: var(--fgColor-muted);
+  transition: color 0.15s ease-in-out;
+}
+
+.nav-tab-inactive:hover {
+  color: var(--fgColor-default);
+}
+
+/* Button hover utilities */
+.btn-theme {
+  border: 1px solid var(--borderColor-default);
+  background-color: var(--bgColor-default);
+  color: var(--fgColor-default);
+  transition: opacity 0.15s ease-in-out;
+}
+
+.btn-theme:hover {
+  opacity: 0.8;
 }
