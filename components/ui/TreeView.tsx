@@ -119,58 +119,57 @@ export default function TreeView({
 
   const getFileIcon = (item: GitHubItem) => {
     if (item.type === 'dir') {
-      return <Folder className="h-4 w-4 flex-shrink-0 text-blue-600" />;
+      return <Folder className="text-fg-muted h-4 w-4 flex-shrink-0" />;
     }
 
-    const extension = item.name.split('.').pop()?.toLowerCase();
-    let iconColor = 'text-gray-500';
+    const iconColor = 'text-fg-muted';
 
-    switch (extension) {
-      case 'js':
-      case 'jsx':
-        iconColor = 'text-yellow-500';
-        break;
-      case 'ts':
-      case 'tsx':
-        iconColor = 'text-blue-600';
-        break;
-      case 'py':
-        iconColor = 'text-green-600';
-        break;
-      case 'json':
-        iconColor = 'text-yellow-600';
-        break;
-      case 'md':
-      case 'mdx':
-        iconColor = 'text-blue-500';
-        break;
-      case 'css':
-      case 'scss':
-      case 'sass':
-        iconColor = 'text-pink-500';
-        break;
-      case 'html':
-      case 'htm':
-        iconColor = 'text-red-500';
-        break;
-      case 'vue':
-        iconColor = 'text-green-500';
-        break;
-      case 'php':
-        iconColor = 'text-purple-500';
-        break;
-      case 'java':
-        iconColor = 'text-orange-600';
-        break;
-      case 'xml':
-      case 'svg':
-        iconColor = 'text-orange-500';
-        break;
-      case 'yml':
-      case 'yaml':
-        iconColor = 'text-red-400';
-        break;
-    }
+    // switch (extension) {
+    //   case 'js':
+    //   case 'jsx':
+    //     iconColor = 'text-yellow-500';
+    //     break;
+    //   case 'ts':
+    //   case 'tsx':
+    //     iconColor = 'text-blue-600';
+    //     break;
+    //   case 'py':
+    //     iconColor = 'text-green-600';
+    //     break;
+    //   case 'json':
+    //     iconColor = 'text-yellow-600';
+    //     break;
+    //   case 'md':
+    //   case 'mdx':
+    //     iconColor = 'text-blue-500';
+    //     break;
+    //   case 'css':
+    //   case 'scss':
+    //   case 'sass':
+    //     iconColor = 'text-pink-500';
+    //     break;
+    //   case 'html':
+    //   case 'htm':
+    //     iconColor = 'text-red-500';
+    //     break;
+    //   case 'vue':
+    //     iconColor = 'text-green-500';
+    //     break;
+    //   case 'php':
+    //     iconColor = 'text-purple-500';
+    //     break;
+    //   case 'java':
+    //     iconColor = 'text-orange-600';
+    //     break;
+    //   case 'xml':
+    //   case 'svg':
+    //     iconColor = 'text-orange-500';
+    //     break;
+    //   case 'yml':
+    //   case 'yaml':
+    //     iconColor = 'text-red-400';
+    //     break;
+    // }
 
     return <File className={`h-4 w-4 ${iconColor} flex-shrink-0`} />;
   };
@@ -184,31 +183,15 @@ export default function TreeView({
     return (
       <div key={item.sha}>
         <div
-          className="group flex cursor-pointer items-center px-3 py-1.5 text-sm transition-colors duration-150 ease-in-out select-none"
+          className={`group hover:bg-bg-muted flex cursor-pointer items-center px-3 py-1.5 text-sm transition-colors duration-150 ease-in-out select-none ${
+            isSelected
+              ? 'border-fg-accent bg-bg-muted text-fg-accent border-r-2'
+              : 'text-fg-default'
+          }`}
           style={{
-            paddingLeft: `${level * 16 + 12}px`,
-            ...(isSelected
-              ? {
-                  borderRight: '2px solid var(--fgColor-accent)',
-                  backgroundColor: 'var(--bgColor-muted)',
-                  color: 'var(--fgColor-accent)',
-                }
-              : {
-                  color: 'var(--fgColor-default)',
-                }),
-          }}
-          onMouseEnter={(e) => {
-            if (!isSelected) {
-              e.currentTarget.style.backgroundColor = 'var(--bgColor-muted)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isSelected) {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }
+            paddingLeft: `${level * 18 + 12}px`,
           }}
           onClick={() => {
-            console.log('🖱️ Item clicked:', item.name, 'type:', item.type);
             if (isDirectory) {
               handleDirectoryToggle(item);
             } else {
@@ -217,9 +200,9 @@ export default function TreeView({
           }}
         >
           {isDirectory && (
-            <span className="mr-1.5 flex-shrink-0 text-gray-400 group-hover:text-gray-600">
+            <span className="text-fg-muted group-hover:text-fg-default mr-1.5 flex-shrink-0">
               {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                <Loader2 className="text-fg-accent h-4 w-4 animate-spin" />
               ) : isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
@@ -248,29 +231,15 @@ export default function TreeView({
   };
 
   return (
-    <div
-      className="h-full overflow-y-auto shadow-sm"
-      style={{
-        borderRight: '1px solid var(--borderColor-default)',
-        backgroundColor: 'var(--bgColor-default)',
-      }}
-    >
+    <div className="border-border-default bg-bg-default h-full overflow-y-auto border-r shadow-sm">
       {/* GitHub-style header */}
-      <div
-        className="px-4 py-3"
-        style={{
-          borderBottom: '1px solid var(--borderColor-default)',
-          backgroundColor: 'var(--bgColor-muted)',
-        }}
-      >
-        <h2 className="text-sm font-semibold" style={{ color: 'var(--fgColor-default)' }}>
-          Files
-        </h2>
+      <div className="border-border-default bg-bg-muted border-b px-4 py-3">
+        <h2 className="text-fg-default text-sm font-semibold">Files</h2>
       </div>
 
       <div className="py-2">
         {data.length === 0 ? (
-          <div className="px-4 py-8 text-center" style={{ color: 'var(--fgColor-muted)' }}>
+          <div className="text-fg-muted px-4 py-8 text-center">
             <Folder className="mx-auto mb-2 h-8 w-8 opacity-30" />
             <p className="text-sm">No files found</p>
           </div>

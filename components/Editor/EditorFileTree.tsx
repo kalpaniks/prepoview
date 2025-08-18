@@ -61,21 +61,10 @@ export default function EditorFileTree({ onFileSelect, selectedFile }: FileTreeP
 
   if (isInitialLoading) {
     return (
-      <div
-        className="flex h-full items-center justify-center"
-        style={{
-          borderRight: '1px solid var(--borderColor-default)',
-          backgroundColor: 'var(--bgColor-default)',
-        }}
-      >
+      <div className="border-border-default bg-bg-default flex h-full items-center justify-center border-r">
         <div className="text-center">
-          <Loader2
-            className="mx-auto mb-3 h-8 w-8 animate-spin"
-            style={{ color: 'var(--fgColor-accent)' }}
-          />
-          <p className="text-sm" style={{ color: 'var(--fgColor-muted)' }}>
-            Loading repository...
-          </p>
+          <Loader2 className="text-fg-accent mx-auto mb-3 h-8 w-8 animate-spin" />
+          <p className="text-fg-muted text-sm">Loading repository...</p>
         </div>
       </div>
     );
@@ -83,19 +72,11 @@ export default function EditorFileTree({ onFileSelect, selectedFile }: FileTreeP
 
   if (error) {
     return (
-      <div
-        className="flex h-full items-center justify-center"
-        style={{
-          borderRight: '1px solid var(--borderColor-default)',
-          backgroundColor: 'var(--bgColor-default)',
-        }}
-      >
-        <div className="max-w-xs text-center" style={{ color: 'var(--fgColor-danger)' }}>
+      <div className="border-border-default bg-bg-default flex h-full items-center justify-center border-r">
+        <div className="text-fg-danger max-w-xs text-center">
           <AlertCircle className="mx-auto mb-3 h-8 w-8" />
           <p className="mb-2 text-sm font-medium">Failed to load repository</p>
-          <p className="text-xs" style={{ color: 'var(--fgColor-muted)' }}>
-            {error}
-          </p>
+          <p className="text-fg-muted text-xs">{error}</p>
         </div>
       </div>
     );

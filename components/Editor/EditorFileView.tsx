@@ -292,17 +292,12 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
   // No file selected state - GitHub style
   if (!selectedFile) {
     return (
-      <div className="flex h-full flex-col" style={{ backgroundColor: 'var(--bgColor-default)' }}>
+      <div className="bg-bg-default flex h-full flex-col">
         <div className="flex h-full items-center justify-center">
           <div className="text-center">
-            <File
-              className="mx-auto mb-4 h-16 w-16 opacity-30"
-              style={{ color: 'var(--fgColor-muted)' }}
-            />
-            <h3 className="mb-2 text-lg font-normal" style={{ color: 'var(--fgColor-default)' }}>
-              No file selected
-            </h3>
-            <p className="text-sm" style={{ color: 'var(--fgColor-muted)' }}>
+            <File className="text-fg-muted mx-auto mb-4 h-16 w-16 opacity-30" />
+            <h3 className="text-fg-default mb-2 text-lg font-normal">No file selected</h3>
+            <p className="text-fg-muted text-sm">
               Choose a file from the repository tree to view its contents
             </p>
           </div>
@@ -314,18 +309,12 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
   // Loading state - GitHub style
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col" style={{ backgroundColor: 'var(--bgColor-default)' }}>
+      <div className="bg-bg-default flex h-full flex-col">
         {/* File header placeholder */}
-        <div
-          className="px-4 py-3"
-          style={{
-            borderBottom: '1px solid var(--borderColor-default)',
-            backgroundColor: 'var(--bgColor-muted)',
-          }}
-        >
+        <div className="border-border-default bg-bg-muted border-b px-4 py-3">
           <div className="flex items-center">
-            <File className="mr-2 h-4 w-4" style={{ color: 'var(--fgColor-muted)' }} />
-            <span className="text-sm font-medium" style={{ color: 'var(--fgColor-default)' }}>
+            <File className="text-fg-muted mr-2 h-4 w-4" />
+            <span className="text-fg-default text-sm font-medium">
               {selectedFile.split('/').pop()}
             </span>
           </div>
@@ -333,13 +322,8 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
 
         <div className="flex h-full items-center justify-center">
           <div className="text-center">
-            <Loader2
-              className="mx-auto mb-4 h-8 w-8 animate-spin"
-              style={{ color: 'var(--fgColor-accent)' }}
-            />
-            <p className="text-sm" style={{ color: 'var(--fgColor-muted)' }}>
-              Loading file content...
-            </p>
+            <Loader2 className="text-fg-accent mx-auto mb-4 h-8 w-8 animate-spin" />
+            <p className="text-fg-muted text-sm">Loading file content...</p>
           </div>
         </div>
       </div>
@@ -349,17 +333,11 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
   // Error state - GitHub style
   if (error) {
     return (
-      <div className="flex h-full flex-col" style={{ backgroundColor: 'var(--bgColor-default)' }}>
-        <div
-          className="px-4 py-3"
-          style={{
-            borderBottom: '1px solid var(--borderColor-default)',
-            backgroundColor: 'var(--bgColor-muted)',
-          }}
-        >
+      <div className="bg-bg-default flex h-full flex-col">
+        <div className="border-border-default bg-bg-muted border-b px-4 py-3">
           <div className="flex items-center">
-            <File className="mr-2 h-4 w-4" style={{ color: 'var(--fgColor-danger)' }} />
-            <span className="text-sm font-medium" style={{ color: 'var(--fgColor-default)' }}>
+            <File className="text-fg-danger mr-2 h-4 w-4" />
+            <span className="text-fg-default text-sm font-medium">
               {selectedFile.split('/').pop()}
             </span>
           </div>
@@ -367,16 +345,9 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
 
         <div className="flex h-full items-center justify-center">
           <div className="text-center">
-            <File
-              className="mx-auto mb-4 h-16 w-16 opacity-50"
-              style={{ color: 'var(--fgColor-danger)' }}
-            />
-            <h3 className="mb-2 text-lg font-medium" style={{ color: 'var(--fgColor-danger)' }}>
-              Error loading file
-            </h3>
-            <p className="text-sm" style={{ color: 'var(--fgColor-muted)' }}>
-              {error}
-            </p>
+            <File className="text-fg-danger mx-auto mb-4 h-16 w-16 opacity-50" />
+            <h3 className="text-fg-danger mb-2 text-lg font-medium">Error loading file</h3>
+            <p className="text-fg-muted text-sm">{error}</p>
           </div>
         </div>
       </div>
@@ -387,37 +358,20 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
   const lineCount = fileContent?.content ? getLineCount(fileContent.content) : 0;
 
   return (
-    <div className="flex h-full flex-col" style={{ backgroundColor: 'var(--bgColor-default)' }}>
+    <div className="bg-bg-default flex h-full flex-col">
       {/* GitHub-style file header */}
-      <div
-        className="px-4 py-3"
-        style={{
-          borderBottom: '1px solid var(--borderColor-default)',
-          backgroundColor: 'var(--bgColor-default)',
-        }}
-      >
+      <div className="border-border-default bg-bg-default border-b px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <File className="mr-2 h-4 w-4" style={{ color: 'var(--fgColor-muted)' }} />
-            <span className="text-sm font-medium" style={{ color: 'var(--fgColor-default)' }}>
-              {fileContent?.name}
-            </span>
+            <File className="text-fg-muted mr-2 h-4 w-4" />
+            <span className="text-fg-default text-sm font-medium">{fileContent?.name}</span>
           </div>
 
           {/* GitHub-style file stats */}
-          <div
-            className="flex items-center space-x-4 text-xs"
-            style={{ color: 'var(--fgColor-muted)' }}
-          >
+          <div className="text-fg-muted flex items-center space-x-4 text-xs">
             <span>{lineCount} lines</span>
             {fileContent?.size && <span>{formatFileSize(fileContent.size)}</span>}
-            <span
-              className="rounded px-2 py-1 font-mono text-xs"
-              style={{
-                backgroundColor: 'var(--bgColor-muted)',
-                color: 'var(--fgColor-default)',
-              }}
-            >
+            <span className="bg-bg-muted text-fg-default rounded px-2 py-1 font-mono text-xs">
               {language}
             </span>
           </div>

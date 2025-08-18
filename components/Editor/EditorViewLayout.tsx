@@ -21,20 +21,14 @@ export default function EditorViewLayout({ shareData }: EditorViewLayoutProps) {
   };
 
   return (
-    <div className="flex h-full" style={{ backgroundColor: 'var(--bgColor-muted)' }}>
+    <div className="bg-bg-muted flex h-full">
       {/* Left sidebar - File tree */}
       <div className="w-80 flex-shrink-0">
         <EditorFileTree onFileSelect={handleFileSelect} selectedFile={selectedFile} />
       </div>
 
       {/* Right side - Code editor */}
-      <div
-        className="min-w-0 flex-1 shadow-sm"
-        style={{
-          borderLeft: '1px solid var(--borderColor-default)',
-          backgroundColor: 'var(--bgColor-default)',
-        }}
-      >
+      <div className="border-border-default bg-bg-default min-w-0 flex-1 border-l shadow-sm">
         <Editor shareId={shareData.shareId} selectedFile={selectedFile} />
       </div>
     </div>

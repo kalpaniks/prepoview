@@ -37,6 +37,17 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Add missing GitHub theme variable mappings */
+  --color-fg-accent: var(--fgColor-accent);
+  --color-fg-default: var(--fgColor-default);
+  --color-fg-muted: var(--fgColor-muted);
+  --color-fg-danger: var(--fgColor-danger);
+  --color-bg-default: var(--bgColor-default);
+  --color-bg-muted: var(--bgColor-muted);
+  --color-border-default: var(--borderColor-default);
+  --color-border-muted: var(--borderColor-muted);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
