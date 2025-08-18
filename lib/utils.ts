@@ -22,15 +22,18 @@ interface TreeItem {
   path: string;
 }
 
-export function transformGithubResponseTree(githubItems : GithubFileTree[], parent: number = 0): TreeItem[] {
+export function transformGithubResponseTree(
+  githubItems: GithubFileTree[],
+  parent: number = 0
+): TreeItem[] {
   const reposne = githubItems.map((item) => {
     return {
       id: item.sha,
       name: item.name,
       isBranch: item.type == 'file' ? false : true,
       path: item.path,
-      parent: parent
-    }
-  })
+      parent: parent,
+    };
+  });
   return reposne;
 }

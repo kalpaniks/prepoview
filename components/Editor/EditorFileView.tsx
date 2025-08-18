@@ -17,7 +17,9 @@ interface FileContent {
   encoding?: string;
 }
 
-const defineGitHubThemes = (monaco: any) => {
+type Monaco = typeof import('monaco-editor');
+
+const defineGitHubThemes = (monaco: Monaco) => {
   monaco.editor.defineTheme('github-light', {
     base: 'vs',
     inherit: true,
@@ -260,7 +262,7 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
         if (data.encoding === 'base64') {
           try {
             decodedContent = decodeURIComponent(escape(atob(data.content)));
-          } catch (e) {
+          } catch {
             // Fallback for simple ASCII content
             decodedContent = atob(data.content);
           }

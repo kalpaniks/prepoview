@@ -4,17 +4,25 @@ import { getBaseTree } from '@/lib/github';
 import { getDecryptedTokensForUser } from '@/lib/adapter';
 import prisma from '@/lib/prisma';
 
+// Define proper interface for GitHub API tree item response
+interface GitHubTreeItem {
+  name: string;
+  path: string;
+  type: 'file' | 'dir';
+  sha: string;
+  size?: number;
+  download_url?: string;
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ shareId: string }> }) {
   const { shareId } = await params;
-  const branch = req.nextUrl.searchParams.get('branch');
-  const directoryPath = req.nextUrl.searchParams.get('path'); 
+  const directoryPath = req.nextUrl.searchParams.get('path');
 
   if (!shareId) {
     return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
   }
 
   try {
-    const defaultBranch = branch ?? 'main';
     const share = await getShareDetails(shareId);
     const accessToken = await getDecryptedTokensForUser(prisma, share.userId, 'github');
 
@@ -22,7 +30,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
       return NextResponse.json({ error: 'Access token not found' }, { status: 400 });
     }
 
-    let githubTreeResponse;
+    let githubTreeResponse: GitHubTreeItem[];
 
     if (directoryPath) {
       githubTreeResponse = await fetchDirectoryContents(
@@ -38,7 +46,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
         accessToken.access_token
       );
     }
-    const transformedData = githubTreeResponse.map((item: any) => ({
+
+    const transformedData = githubTreeResponse.map((item: GitHubTreeItem) => ({
       name: item.name,
       path: item.path,
       type: item.type === 'file' ? 'file' : 'dir',
@@ -63,7 +72,7 @@ async function fetchDirectoryContents(
   repoOwner: string,
   accessToken: string,
   directoryPath: string
-) {
+): Promise<GitHubTreeItem[]> {
   const encodedPath = encodeURIComponent(directoryPath);
   const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${encodedPath}`;
 
@@ -87,5 +96,5 @@ async function fetchDirectoryContents(
     throw new Error('Expected directory contents to be an array');
   }
 
-  return data;
+  return data as GitHubTreeItem[];
 }

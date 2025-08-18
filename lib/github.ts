@@ -1,11 +1,4 @@
-import prisma from '@/lib/prisma';
-
-export async function getTree(
-  repoName: string,
-  repoOwner: string,
-  accessToken: string,
-  branch: string = 'main'
-) {
+export async function getTree(repoName: string, repoOwner: string, accessToken: string) {
   const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -63,4 +56,3 @@ export async function getBaseTree(repoName: string, repoOwner: string, accessTok
   const data = await response.json();
   return data;
 }
-
