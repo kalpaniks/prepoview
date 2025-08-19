@@ -1,23 +1,32 @@
 import EditorViewLayout from '@/components/Editor/EditorViewLayout';
 import { Github, Calendar, FileText } from 'lucide-react';
+import { getShareDetails } from '@/lib/share';
+import Link from 'next/link';
 
 interface SharePageProps {
   params: Promise<{ shareId: string }>;
 }
 
 async function getShare(shareId: string) {
-  return {
-    shareId,
-    repoName: 'btc-price-prediction',
-    repoOwner: 'joshua-ng',
-    createdAt: new Date().toISOString(),
-    fileCount: 10,
-  };
+  try {
+    const shareData = await getShareDetails(shareId);
+    return {
+      shareId: shareData.id,
+      repoName: shareData.repoName,
+      repoOwner: shareData.repoOwner,
+      createdAt: shareData.createdAt,
+    };
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export default async function SharePage({ params }: SharePageProps) {
   const { shareId } = await params;
   const shareData = await getShare(shareId);
+  if (!shareData) {
+    return <div>Share not found</div>;
+  }
 
   return (
     <div className="bg-bg-muted flex h-screen w-full flex-col">
@@ -27,18 +36,21 @@ export default async function SharePage({ params }: SharePageProps) {
             <div className="flex-1">
               <div className="mb-3 flex items-center space-x-2">
                 <Github className="text-fg-muted h-5 w-5" />
-                <nav className="flex items-center space-x-1 text-sm">
-                  <span className="text-fg-accent cursor-pointer font-medium hover:underline">
+                <nav className="text-md flex items-center space-x-1">
+                  <Link
+                    href={`https://github.com/${shareData.repoOwner}`}
+                    className="text-fg-accent cursor-pointer font-medium hover:underline"
+                  >
                     {shareData.repoOwner}
-                  </span>
+                  </Link>
                   <span className="text-fg-muted">/</span>
-                  <span className="text-fg-accent cursor-pointer text-lg font-semibold hover:underline">
+                  <span className="text-fg-accent cursor-pointer font-medium hover:underline">
                     {shareData.repoName}
                   </span>
                 </nav>
 
                 <span className="border-border-default bg-bg-muted text-fg-muted inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium">
-                  Public
+                  Private
                 </span>
               </div>
             </div>
@@ -47,10 +59,6 @@ export default async function SharePage({ params }: SharePageProps) {
               <div className="mb-1 flex items-center space-x-2">
                 <Calendar className="h-4 w-4" />
                 <span>Shared {new Date(shareData.createdAt).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4" />
-                <span>{shareData.fileCount} files</span>
               </div>
             </div>
           </div>

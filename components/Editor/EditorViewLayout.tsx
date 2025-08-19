@@ -8,7 +8,7 @@ interface EditorViewLayoutProps {
     shareId: string;
     repoName: string;
     repoOwner: string;
-    fileCount: number;
+    createdAt: Date;
   };
 }
 
@@ -22,12 +22,12 @@ export default function EditorViewLayout({ shareData }: EditorViewLayoutProps) {
 
   return (
     <div className="bg-bg-muted flex h-full">
-      {/* Left sidebar - File tree */}
+      {/* Left sidebar  */}
       <div className="w-80 flex-shrink-0">
         <EditorFileTree onFileSelect={handleFileSelect} selectedFile={selectedFile} />
       </div>
 
-      {/* Right side - Code editor */}
+      {/* Right side  */}
       <div className="border-border-default bg-bg-default min-w-0 flex-1 border-l shadow-sm">
         <Editor shareId={shareData.shareId} selectedFile={selectedFile} />
       </div>
