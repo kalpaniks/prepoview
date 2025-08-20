@@ -1,7 +1,13 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { useState } from 'react';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -9,22 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -35,468 +25,419 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  GitBranch,
-  Clock,
-  Share2,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Trash2,
+  ExternalLink,
   Copy,
-  Settings,
   Shield,
-  Calendar,
+  Clock,
   Users,
+  GitBranch,
+  Star,
   Eye,
-  GitFork,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
-// Type definitions for our data structures
-interface Repository {
-  id: string;
-  name: string;
-  owner: string;
-  description: string;
-  isPrivate: boolean;
-  language: string;
-  stars: number;
-  forks: number;
-}
-
-interface ShareItem {
-  id: string;
-  repoName: string;
-  repoOwner: string;
-  createdAt: string;
-  expiresAt?: string;
-  views: number;
-  shareUrl: string;
-}
-
-// Mock data for repositories (you'll replace this with real GitHub API calls)
-const mockRepositories: Repository[] = [
+// Mock data for repositories
+const mockRepositories = [
   {
-    id: '1',
-    name: 'awesome-nextjs-app',
-    owner: 'johndoe',
-    description: 'A production-ready Next.js application with TypeScript',
-    isPrivate: true,
+    id: 1,
+    name: 'private-api-service',
+    description: 'Internal API service for customer management',
     language: 'TypeScript',
-    stars: 45,
-    forks: 8,
+    stars: 12,
+    isPrivate: true,
+    updatedAt: '2 hours ago',
   },
   {
-    id: '2',
-    name: 'react-dashboard',
-    owner: 'johndoe',
-    description: 'Modern React dashboard with shadcn/ui',
-    isPrivate: false,
-    language: 'JavaScript',
-    stars: 123,
-    forks: 34,
+    id: 2,
+    name: 'secret-ml-model',
+    description: 'Machine learning model for predictive analytics',
+    language: 'Python',
+    stars: 8,
+    isPrivate: true,
+    updatedAt: '1 day ago',
   },
   {
-    id: '3',
-    name: 'api-microservice',
-    owner: 'johndoe',
-    description: 'Scalable Node.js microservice architecture',
+    id: 3,
+    name: 'internal-dashboard',
+    description: 'Company internal dashboard and analytics',
+    language: 'React',
+    stars: 15,
     isPrivate: true,
-    language: 'TypeScript',
-    stars: 67,
-    forks: 15,
+    updatedAt: '3 days ago',
+  },
+  {
+    id: 4,
+    name: 'config-manager',
+    description: 'Configuration management system',
+    language: 'Go',
+    stars: 5,
+    isPrivate: true,
+    updatedAt: '1 week ago',
   },
 ];
 
 // Mock data for active shares
-const mockActiveShares: ShareItem[] = [
+const mockShares = [
   {
-    id: 'share_1',
-    repoName: 'awesome-nextjs-app',
-    repoOwner: 'johndoe',
-    createdAt: '2024-01-15T10:30:00Z',
-    expiresAt: '2024-01-22T10:30:00Z',
-    views: 24,
-    shareUrl: 'https://yourapp.com/share/share_1',
+    id: 1,
+    repositoryName: 'private-api-service',
+    sharedWith: 'john.doe@company.com',
+    expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days
+    viewLimit: 10,
+    viewCount: 3,
+    shareLink: 'https://share.repo.com/abc123',
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
   },
   {
-    id: 'share_2',
-    repoName: 'react-dashboard',
-    repoOwner: 'johndoe',
-    createdAt: '2024-01-10T14:20:00Z',
-    views: 56,
-    shareUrl: 'https://yourapp.com/share/share_2',
+    id: 2,
+    repositoryName: 'secret-ml-model',
+    sharedWith: 'jane.smith@partner.com',
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    viewLimit: 5,
+    viewCount: 1,
+    shareLink: 'https://share.repo.com/def456',
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
   },
-];
-
-const DURATION_OPTIONS = [
-  { value: '1h', label: '1 Hour' },
-  { value: '24h', label: '24 Hours' },
-  { value: '7d', label: '7 Days' },
-  { value: '30d', label: '30 Days' },
-  { value: 'never', label: 'Never Expires' },
 ];
 
 export default function SharePage() {
-  const [selectedRepo, setSelectedRepo] = useState<string>('');
-  const [selectedDuration, setSelectedDuration] = useState<string>('');
-  const [activeShares, setActiveShares] = useState<ShareItem[]>(mockActiveShares);
-  const [isLoading, setIsLoading] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [shareToDelete, setShareToDelete] = useState<string | null>(null);
+  const [shares, setShares] = useState(mockShares);
+  const [selectedRepo, setSelectedRepo] = useState<(typeof mockRepositories)[0] | null>(null);
+  const [shareEmail, setShareEmail] = useState('');
+  const [expirationDays, setExpirationDays] = useState('7');
+  const [viewLimit, setViewLimit] = useState('10');
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
-  // Function to handle sharing a repository
-  const handleShareRepository = async () => {
-    if (!selectedRepo || !selectedDuration) {
-      alert('Please select both repository and duration');
-      return;
-    }
+  // Use next-themes for production-ready theme management
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
-    setIsLoading(true);
+  const handleShareRepository = () => {
+    if (!selectedRepo || !shareEmail) return;
 
-    // Simulate API call - you'll replace this with actual implementation
-    setTimeout(() => {
-      const newShare: ShareItem = {
-        id: `share_${Date.now()}`,
-        repoName: mockRepositories.find((r) => r.id === selectedRepo)?.name || '',
-        repoOwner: mockRepositories.find((r) => r.id === selectedRepo)?.owner || '',
-        createdAt: new Date().toISOString(),
-        expiresAt:
-          selectedDuration === 'never'
-            ? undefined
-            : new Date(Date.now() + getDurationInMs(selectedDuration)).toISOString(),
-        views: 0,
-        shareUrl: `https://yourapp.com/share/share_${Date.now()}`,
-      };
-
-      setActiveShares((prev) => [newShare, ...prev]);
-      setSelectedRepo('');
-      setSelectedDuration('');
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  // Helper function to convert duration to milliseconds
-  const getDurationInMs = (duration: string): number => {
-    const durations: Record<string, number> = {
-      '1h': 60 * 60 * 1000,
-      '24h': 24 * 60 * 60 * 1000,
-      '7d': 7 * 24 * 60 * 60 * 1000,
-      '30d': 30 * 24 * 60 * 60 * 1000,
+    const newShare = {
+      id: shares.length + 1,
+      repositoryName: selectedRepo.name,
+      sharedWith: shareEmail,
+      expiresAt: new Date(Date.now() + Number.parseInt(expirationDays) * 24 * 60 * 60 * 1000),
+      viewLimit: Number.parseInt(viewLimit),
+      viewCount: 0,
+      shareLink: `https://share.repo.com/${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date(),
     };
-    return durations[duration] || 0;
+
+    setShares([...shares, newShare]);
+    setIsShareDialogOpen(false);
+    setShareEmail('');
+    setSelectedRepo(null);
+
+    toast.success('Repository shared successfully', {
+      description: `${selectedRepo.name} has been shared with ${shareEmail}`,
+    });
   };
 
-  // Function to copy share URL to clipboard
-  const copyToClipboard = async (url: string) => {
-    await navigator.clipboard.writeText(url);
-    // You can add a toast notification here
+  const handleDeleteShare = (shareId: number) => {
+    setShares(shares.filter((share) => share.id !== shareId));
+    toast.success('Share deleted', {
+      description: 'The repository share has been revoked',
+    });
   };
 
-  // Function to delete a share
-  const handleDeleteShare = async (shareId: string) => {
-    setActiveShares((prev) => prev.filter((share) => share.id !== shareId));
-    setDeleteDialogOpen(false);
-    setShareToDelete(null);
+  const handleCopyShareLink = (shareLink: string) => {
+    navigator.clipboard.writeText(shareLink);
+    toast.success('Link copied', {
+      description: 'Share link has been copied to clipboard',
+    });
   };
 
-  // Function to revoke all tokens (you'll implement this)
-  const handleRevokeTokens = () => {
-    console.log('Revoking all GitHub tokens...');
-    // Implement token revocation logic
+  const handleRevokeAccessToken = () => {
+    // Clear all shares when access token is revoked
+    setShares([]);
+    toast.error('Access token revoked', {
+      description: 'All active shares have been invalidated',
+    });
   };
 
-  // Format relative time
-  const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString);
+  const getTimeUntilExpiration = (expiresAt: Date) => {
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    const diff = expiresAt.getTime() - now.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h`;
+    return 'Expired';
   };
 
   return (
     <div className="bg-background min-h-screen">
-      {/* Header */}
-      <header className="border-border bg-card border-b">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Share2 className="text-primary h-6 w-6" />
-              <div>
-                <h1 className="text-foreground text-2xl font-semibold">Repository Sharing</h1>
-                <p className="text-muted-foreground text-sm">
-                  Securely share your private repositories
-                </p>
-              </div>
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-foreground text-3xl font-bold">Repository Sharing Dashboard</h1>
+            <p className="text-muted-foreground mt-2">
+              Securely share your private repositories with controlled access and time limits
+            </p>
+          </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleRevokeTokens} className="text-destructive">
-                  <Shield className="mr-2 h-4 w-4" />
-                  Revoke GitHub Token
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+
+            <Button
+              variant="destructive"
+              onClick={handleRevokeAccessToken}
+              className="flex items-center gap-2"
+            >
+              <Shield className="h-4 w-4" />
+              Revoke Access Token
+            </Button>
           </div>
         </div>
-      </header>
 
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Create New Share Section */}
+        {/* Stats Cards */}
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <GitBranch className="h-5 w-5" />
-                <span>Create New Share</span>
-              </CardTitle>
-              <CardDescription>
-                Share a repository with controlled access and expiration
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Repository Selection */}
-              <div className="space-y-2">
-                <label className="text-foreground text-sm font-medium">Select Repository</label>
-                <Select value={selectedRepo} onValueChange={setSelectedRepo}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a repository to share" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockRepositories.map((repo) => (
-                      <SelectItem key={repo.id} value={repo.id}>
-                        <div className="flex items-center space-x-2">
-                          <div className="flex items-center space-x-2">
-                            <GitFork className="text-muted-foreground h-4 w-4" />
-                            <span className="font-medium">
-                              {repo.owner}/{repo.name}
-                            </span>
-                            {repo.isPrivate && (
-                              <Badge variant="secondary" className="text-xs">
-                                Private
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Repository Details */}
-                {selectedRepo && (
-                  <div className="bg-muted mt-3 rounded-md p-3">
-                    {(() => {
-                      const repo = mockRepositories.find((r) => r.id === selectedRepo);
-                      return repo ? (
-                        <div className="space-y-2">
-                          <p className="text-muted-foreground text-sm">{repo.description}</p>
-                          <div className="text-muted-foreground flex items-center space-x-4 text-xs">
-                            <span className="flex items-center space-x-1">
-                              <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                              <span>{repo.language}</span>
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <Eye className="h-3 w-3" />
-                              <span>{repo.stars}</span>
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <GitFork className="h-3 w-3" />
-                              <span>{repo.forks}</span>
-                            </span>
-                          </div>
-                        </div>
-                      ) : null;
-                    })()}
-                  </div>
-                )}
-              </div>
-
-              {/* Duration Selection */}
-              <div className="space-y-2">
-                <label className="text-foreground text-sm font-medium">Share Duration</label>
-                <Select value={selectedDuration} onValueChange={setSelectedDuration}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="How long should this share be active?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DURATION_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center space-x-2">
-                          <Clock className="text-muted-foreground h-4 w-4" />
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Share Button */}
-              <Button
-                onClick={handleShareRepository}
-                disabled={!selectedRepo || !selectedDuration || isLoading}
-                className="w-full"
-              >
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                    <span>Creating Share...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Share2 className="h-4 w-4" />
-                    <span>Create Share Link</span>
-                  </div>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Stats Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>Sharing Statistics</span>
-              </CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Private Repositories</CardTitle>
+              <GitBranch className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-muted rounded-lg p-4 text-center">
-                  <div className="text-foreground text-2xl font-bold">{activeShares.length}</div>
-                  <div className="text-muted-foreground text-sm">Active Shares</div>
-                </div>
-                <div className="bg-muted rounded-lg p-4 text-center">
-                  <div className="text-foreground text-2xl font-bold">
-                    {activeShares.reduce((sum, share) => sum + share.views, 0)}
-                  </div>
-                  <div className="text-muted-foreground text-sm">Total Views</div>
-                </div>
+              <div className="text-2xl font-bold">{mockRepositories.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Shares</CardTitle>
+              <Users className="text-muted-foreground h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{shares.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+              <Eye className="text-muted-foreground h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {shares.reduce((acc, share) => acc + share.viewCount, 0)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+              <Clock className="text-muted-foreground h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {
+                  shares.filter(
+                    (share) => share.expiresAt.getTime() - Date.now() < 24 * 60 * 60 * 1000
+                  ).length
+                }
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Active Shares Section */}
-        <Card className="mt-8">
+        {/* Repository List */}
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5" />
-              <span>Active Shares</span>
-            </CardTitle>
-            <CardDescription>Manage your currently shared repositories</CardDescription>
+            <CardTitle>Your Private Repositories</CardTitle>
+            <CardDescription>
+              Select a repository to share with external collaborators
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {activeShares.length === 0 ? (
-              <Alert>
-                <Share2 className="h-4 w-4" />
-                <AlertDescription>
-                  No active shares yet. Create your first share above to get started.
-                </AlertDescription>
-              </Alert>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {mockRepositories.map((repo) => (
+                <Card key={repo.id} className="hover:border-primary/50 border-2 transition-colors">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{repo.name}</CardTitle>
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Shield className="h-3 w-3" />
+                        Private
+                      </Badge>
+                    </div>
+                    <CardDescription>{repo.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="text-muted-foreground flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1">
+                          <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                          {repo.language}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Star className="h-3 w-3" />
+                          {repo.stars}
+                        </span>
+                        <span>Updated {repo.updatedAt}</span>
+                      </div>
+                      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" onClick={() => setSelectedRepo(repo)}>
+                            Share
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Share Repository</DialogTitle>
+                            <DialogDescription>
+                              Share "{selectedRepo?.name}" with controlled access and time limits
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor="email">Email Address</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                placeholder="colleague@company.com"
+                                value={shareEmail}
+                                onChange={(e) => setShareEmail(e.target.value)}
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="expiration">Expiration</Label>
+                              <Select value={expirationDays} onValueChange={setExpirationDays}>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1">1 day</SelectItem>
+                                  <SelectItem value="3">3 days</SelectItem>
+                                  <SelectItem value="7">1 week</SelectItem>
+                                  <SelectItem value="14">2 weeks</SelectItem>
+                                  <SelectItem value="30">1 month</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="viewLimit">View Limit</Label>
+                              <Select value={viewLimit} onValueChange={setViewLimit}>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1">1 view</SelectItem>
+                                  <SelectItem value="5">5 views</SelectItem>
+                                  <SelectItem value="10">10 views</SelectItem>
+                                  <SelectItem value="25">25 views</SelectItem>
+                                  <SelectItem value="100">100 views</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button onClick={handleShareRepository} disabled={!shareEmail}>
+                              Create Share Link
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Active Shares Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Shares</CardTitle>
+            <CardDescription>
+              Manage your active repository shares and monitor access
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {shares.length === 0 ? (
+              <div className="text-muted-foreground py-8 text-center">
+                <Users className="mx-auto mb-4 h-12 w-12 opacity-50" />
+                <p>No active shares yet</p>
+                <p className="text-sm">Share a repository to see it here</p>
+              </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Repository</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Expires</TableHead>
+                    <TableHead>Shared With</TableHead>
                     <TableHead>Views</TableHead>
+                    <TableHead>Expires In</TableHead>
+                    <TableHead>Created</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {activeShares.map((share) => (
+                  {shares.map((share) => (
                     <TableRow key={share.id}>
+                      <TableCell className="font-medium">{share.repositoryName}</TableCell>
+                      <TableCell>{share.sharedWith}</TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <GitBranch className="text-muted-foreground h-4 w-4" />
-                          <div>
-                            <div className="font-medium">
-                              {share.repoOwner}/{share.repoName}
-                            </div>
-                            <div className="text-muted-foreground text-sm">ID: {share.id}</div>
+                        <div className="flex items-center gap-2">
+                          <span>
+                            {share.viewCount}/{share.viewLimit}
+                          </span>
+                          <div className="bg-muted h-2 w-16 overflow-hidden rounded-full">
+                            <div
+                              className="bg-primary h-full rounded-full transition-all"
+                              style={{
+                                width: `${(share.viewCount / share.viewLimit) * 100}%`,
+                              }}
+                            />
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">{formatRelativeTime(share.createdAt)}</div>
+                        <Badge
+                          variant={
+                            share.expiresAt.getTime() - Date.now() < 24 * 60 * 60 * 1000
+                              ? 'destructive'
+                              : 'secondary'
+                          }
+                        >
+                          {getTimeUntilExpiration(share.expiresAt)}
+                        </Badge>
                       </TableCell>
-                      <TableCell>
-                        {share.expiresAt ? (
-                          <Badge variant="outline" className="text-xs">
-                            {formatRelativeTime(share.expiresAt)}
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            Never
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-1">
-                          <Eye className="text-muted-foreground h-3 w-3" />
-                          <span className="text-sm">{share.views}</span>
-                        </div>
-                      </TableCell>
+                      <TableCell>{share.createdAt.toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end space-x-2">
+                        <div className="flex items-center justify-end gap-2">
                           <Button
-                            variant="outline"
                             size="sm"
-                            onClick={() => copyToClipboard(share.shareUrl)}
+                            variant="ghost"
+                            onClick={() => handleCopyShareLink(share.shareLink)}
                           >
-                            <Copy className="h-3 w-3" />
+                            <Copy className="h-4 w-4" />
                           </Button>
-                          <Dialog
-                            open={deleteDialogOpen && shareToDelete === share.id}
-                            onOpenChange={(open) => {
-                              setDeleteDialogOpen(open);
-                              if (!open) setShareToDelete(null);
-                            }}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => window.open(share.shareLink, '_blank')}
                           >
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setShareToDelete(share.id)}
-                              >
-                                <Trash2 className="text-destructive h-3 w-3" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Delete Share</DialogTitle>
-                                <DialogDescription>
-                                  Are you sure you want to delete this share? This action cannot be
-                                  undone and will immediately revoke access for anyone with the
-                                  link.
-                                </DialogDescription>
-                              </DialogHeader>
-                              <DialogFooter>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => setDeleteDialogOpen(false)}
-                                >
-                                  Cancel
-                                </Button>
-                                <Button
-                                  variant="destructive"
-                                  onClick={() => handleDeleteShare(share.id)}
-                                >
-                                  Delete Share
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteShare(share.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -506,7 +447,7 @@ export default function SharePage() {
             )}
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
   );
 }
