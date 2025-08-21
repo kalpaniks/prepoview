@@ -1,0 +1,60 @@
+/**
+ * Repository search result item component
+ * @fileoverview Displays individual repository in search results
+ */
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { GitBranch, Plus } from 'lucide-react';
+import type { Repository } from '@/types/share';
+import { getLanguageColor } from '@/utils/share/helpers';
+
+interface RepositorySearchResultProps {
+  /** Repository data to display */
+  repository: Repository;
+  /** Callback when share button is clicked */
+  onShare: (repository: Repository) => void;
+}
+
+/**
+ * Repository Search Result Component
+ * Displays repository information in a card format with share action
+ */
+export default function RepositorySearchResult({
+  repository,
+  onShare,
+}: RepositorySearchResultProps) {
+  return (
+    <div className="group border-border hover:border-primary/30 hover:bg-accent/30 animate-in fade-in slide-in-from-bottom-1 flex items-center justify-between rounded-lg border p-4 transition-all duration-200 hover:shadow-sm">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
+        <div className="flex items-center gap-2">
+          <GitBranch className="text-muted-foreground h-5 w-5 shrink-0" />
+          <div
+            className={`h-3 w-3 rounded-full ${getLanguageColor(repository.language)} shrink-0`}
+          />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <h3 className="truncate text-sm font-medium">{repository.name}</h3>
+            <Badge variant="outline" className="shrink-0 text-xs">
+              {repository.language}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground line-clamp-1 text-xs">{repository.description}</p>
+          <div className="text-muted-foreground mt-2 flex items-center gap-4 text-xs">
+            <span>{repository.size}</span>
+            <span>Updated {repository.updatedAt}</span>
+            <span className="truncate">by {repository.owner}</span>
+          </div>
+        </div>
+      </div>
+
+      <Button size="sm" onClick={() => onShare(repository)} className="ml-4 shrink-0">
+        <Plus className="mr-1 h-3 w-3" />
+        Share
+      </Button>
+    </div>
+  );
+}
