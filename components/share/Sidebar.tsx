@@ -5,9 +5,9 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Activity, GitBranch, Clock, Calendar, Settings, Shield } from 'lucide-react';
+import { Users, Activity, GitBranch, Clock, Settings, Shield } from 'lucide-react';
 import type { GitHubProfile, ShareAnalytics, Share } from '@/types/share';
-import { formatGitHubJoinDate, truncateEmail, isExpiringSoon } from '@/utils/share/helpers';
+import { truncateEmail, isExpiringSoon } from '@/utils/share/helpers';
 
 interface SidebarProps {
   /** GitHub profile information */
@@ -16,9 +16,7 @@ interface SidebarProps {
   analytics: ShareAnalytics;
 }
 
-/**
- * GitHub Profile Section Component
- */
+
 function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
   return (
     <div className="space-y-4">
@@ -37,13 +35,6 @@ function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
               if (fallback) fallback.classList.remove('hidden');
             }}
           />
-          <div className="bg-muted flex hidden h-16 w-16 items-center justify-center rounded-full text-2xl">
-            👨‍💻
-          </div>
-          {/* Online status indicator */}
-          <div className="border-background absolute -right-1 -bottom-1 flex h-6 w-6 items-center justify-center rounded-full border-2 bg-green-500">
-            <div className="h-2 w-2 rounded-full bg-white"></div>
-          </div>
         </div>
 
         <div className="min-w-0 flex-1">
@@ -56,47 +47,11 @@ function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
           </div>
         </div>
       </div>
-
-      {/* Bio and Company Info */}
-      {profile.bio && <p className="text-foreground text-sm leading-relaxed">{profile.bio}</p>}
-
-      <div className="space-y-2">
-        {profile.company && (
-          <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Users className="h-4 w-4 shrink-0" />
-            <span>{profile.company}</span>
-          </div>
-        )}
-        {profile.location && (
-          <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Calendar className="h-4 w-4 shrink-0" />
-            <span>{profile.location}</span>
-          </div>
-        )}
-        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-          <Clock className="h-4 w-4 shrink-0" />
-          <span>Joined {formatGitHubJoinDate(profile.created_at)}</span>
-        </div>
-      </div>
-
-      {/* GitHub Stats */}
-      <div className="flex items-center gap-4 text-sm">
-        <div className="flex items-center gap-1">
-          <span className="font-medium">{profile.followers}</span>
-          <span className="text-muted-foreground">followers</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="font-medium">{profile.following}</span>
-          <span className="text-muted-foreground">following</span>
-        </div>
-      </div>
     </div>
   );
 }
 
-/**
- * Analytics Grid Component
- */
+
 function AnalyticsSection({ analytics }: { analytics: ShareAnalytics }) {
   return (
     <div className="space-y-4">

@@ -5,7 +5,8 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import type { Share, Repository, ShareAnalytics } from '@/types/share';
-import { generateShareId, isExpiringSoon, TIME_CONSTANTS } from '@/utils/share/helpers';
+import { generateShareId, isExpiringSoon } from '@/utils/share/helpers';
+import { TIME_CONSTANTS } from '@/utils/share/constants';
 
 /**
  * Custom hook for managing repository shares with analytics
