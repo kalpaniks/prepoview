@@ -5,32 +5,33 @@ import { Repository } from "@/types/share";
 
 async function getUserRepos(accessToken: string): Promise<Repository[]>{
   try {
-    const response = await fetch(
-      `https://api.github.com/orgs/devhub-hq/repos?type=all`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    // const response = await fetch(`https://api.github.com/user/repos?type=private`, {
-    //   headers: {
-    //     Authorization: `Bearer ${accessToken}`,
-    //   },
-    // });
+    // const response = await fetch(
+    //   `https://api.github.com/orgs/devhub-hq/repos?type=all`,
+    //   {
+    //     headers: {
+    //       Authorization: `Bearer ${accessToken}`,
+    //       'Content-Type': 'application/json',
+    //     },
+    //   }
+    // );
+    const response = await fetch(`https://api.github.com/user/repos?type=private`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
     if(!response.ok){
       throw new Error(`Failed to fetch repos: ${response.statusText}`);
     }
     const repos = await response.json();
-    repos.map((repo: any) => ({
+    const formattedRepos = repos.map((repo: Repository) => ({
       id: repo.id,
       name: repo.name,
       description: repo.description,
       language: repo.language,
-      isPrivate: repo.private,
+      isPrivate: repo.isPrivate,
     }));
-    return repos;
+    return formattedRepos;
   } catch (error) {
     console.error("Error fetching user repos:", error);
     throw new Error("Failed to fetch user repos");
