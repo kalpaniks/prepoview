@@ -1,8 +1,3 @@
-/**
- * Share creation dialog component
- * @fileoverview Modal dialog for configuring repository sharing settings
- */
-
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,22 +21,15 @@ import {
 import { GitBranch } from 'lucide-react';
 import type { Repository } from '@/types/share';
 import { DEFAULT_SHARE_CONFIG } from '@/utils/share/constants';
+import { useCreateShareMutation } from '@/hooks/queries';
 
 interface ShareDialogProps {
-  /** Repository to share (null when dialog is closed) */
   repository: Repository | null;
-  /** Whether the dialog is open */
   isOpen: boolean;
-  /** Callback to close the dialog */
   onClose: () => void;
-  /** Callback when share is created */
   onShare: (repo: Repository, email: string, expirationDays: number, viewLimit: number) => void;
 }
 
-/**
- * Repository Preview Component
- * Shows repository details in the share dialog
- */
 function RepositoryPreview({ repository }: { repository: Repository }) {
   return (
     <div className="bg-muted/50 border-border/50 rounded-lg border p-3">
@@ -57,52 +45,31 @@ function RepositoryPreview({ repository }: { repository: Repository }) {
   );
 }
 
-/**
- * Share Dialog Component
- * Modal for configuring repository sharing with validation
- */
 export default function ShareDialog({ repository, isOpen, onClose, onShare }: ShareDialogProps) {
   const [shareEmail, setShareEmail] = useState('');
   const [expirationDays, setExpirationDays] = useState(DEFAULT_SHARE_CONFIG.expirationDays);
   const [viewLimit, setViewLimit] = useState(DEFAULT_SHARE_CONFIG.viewLimit);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  /**
-   * Validates email format
-   */
+  const mutateShare = useCreateShareMutation();
   const isValidEmail = (email: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  /**
-   * Handles form submission
-   */
   const handleShare = async () => {
     if (!repository || !shareEmail.trim() || !isValidEmail(shareEmail.trim())) {
       return;
     }
-
-    setIsSubmitting(true);
-
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const viewLimitNumber = viewLimit === 'unlimited' ? 1000 : Number.parseInt(viewLimit);
-    onShare(repository, shareEmail.trim(), Number.parseInt(expirationDays), viewLimitNumber);
-
-    // Reset form
-    setShareEmail('');
-    setExpirationDays(DEFAULT_SHARE_CONFIG.expirationDays);
-    setViewLimit(DEFAULT_SHARE_CONFIG.viewLimit);
-    setIsSubmitting(false);
-    onClose();
+    const share = {
+      repoOwner: repository.owner.login,
+      repoName: repository.name,
+      expirationDays: Number.parseInt(expirationDays),
+      viewLimit: Number.parseInt(viewLimit),
+      sharedWith: shareEmail.trim(),
+    };
+    mutateShare.mutate(share);
   };
 
-  /**
-   * Handles dialog close with form reset
-   */
   const handleClose = () => {
-    if (!isSubmitting) {
+    if (!mutateShare.isPending) {
       setShareEmail('');
       setExpirationDays(DEFAULT_SHARE_CONFIG.expirationDays);
       setViewLimit(DEFAULT_SHARE_CONFIG.viewLimit);
@@ -117,13 +84,10 @@ export default function ShareDialog({ repository, isOpen, onClose, onShare }: Sh
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Share Repository</DialogTitle>
-          <DialogDescription>
-            Configure sharing settings for "{repository?.name}"
-          </DialogDescription>
+          <DialogDescription>Configure sharing settings for "{repository?.name}"</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Email Input */}
           <div className="space-y-2">
             <Label htmlFor="email">Recipient Email</Label>
             <Input
@@ -133,21 +97,19 @@ export default function ShareDialog({ repository, isOpen, onClose, onShare }: Sh
               value={shareEmail}
               onChange={(e) => setShareEmail(e.target.value)}
               className="w-full"
-              disabled={isSubmitting}
+              disabled={mutateShare.isPending}
             />
             {shareEmail.trim() && !isValidEmail(shareEmail.trim()) && (
-              <p className="text-xs text-destructive">Please enter a valid email address</p>
+              <p className="text-destructive text-xs">Please enter a valid email address</p>
             )}
           </div>
 
-          {/* Configuration Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="expiration">Access Duration</Label>
               <Select
                 value={expirationDays}
-                onValueChange={setExpirationDays}
-                disabled={isSubmitting}
+                disabled={mutateShare.isPending}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -164,11 +126,7 @@ export default function ShareDialog({ repository, isOpen, onClose, onShare }: Sh
 
             <div className="space-y-2">
               <Label htmlFor="viewLimit">View Limit</Label>
-              <Select
-                value={viewLimit}
-                onValueChange={setViewLimit}
-                disabled={isSubmitting}
-              >
+              <Select value={viewLimit} disabled={mutateShare.isPending}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -183,20 +141,19 @@ export default function ShareDialog({ repository, isOpen, onClose, onShare }: Sh
             </div>
           </div>
 
-          {/* Repository Preview */}
           {repository && <RepositoryPreview repository={repository} />}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
+          <Button variant="outline" onClick={handleClose} disabled={mutateShare.isPending}>
             Cancel
           </Button>
           <Button
             onClick={handleShare}
-            disabled={!isFormValid || isSubmitting}
+            disabled={!isFormValid || mutateShare.isPending}
             className="min-w-[120px]"
           >
-            {isSubmitting ? 'Creating...' : 'Create Share'}
+            {mutateShare.isPending ? 'Creating...' : 'Create Share'}
           </Button>
         </DialogFooter>
       </DialogContent>

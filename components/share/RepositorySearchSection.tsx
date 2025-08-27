@@ -1,8 +1,3 @@
-/**
- * Repository search section component
- * @fileoverview Handles repository search UI with filters and results display
- */
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,32 +16,18 @@ import type { Repository } from '@/types/share';
 import RepositorySearchResult from './RepositorySearchResult';
 
 interface RepositorySearchSectionProps {
-  /** Current search query */
   searchQuery: string;
-  /** Callback to update search query */
   onSearchChange: (query: string) => void;
-  /** Current sort option */
   sortBy: 'name' | 'updated' | 'size';
-  /** Callback to update sort option */
   onSortChange: (sortBy: 'name' | 'updated' | 'size') => void;
-  /** Current language filter */
   languageFilter: string;
-  /** Callback to update language filter */
   onLanguageFilterChange: (language: string) => void;
-  /** Available languages for filtering */
   availableLanguages: string[];
-  /** Whether user has entered a search query */
   hasSearchQuery: boolean;
-  /** Filtered repository results */
   filteredRepositories: Repository[];
-  /** Callback when repository share button is clicked */
   onRepositoryShare: (repository: Repository) => void;
 }
 
-/**
- * Search Empty State Component
- * Shown when no search query is entered
- */
 function SearchEmptyState() {
   return (
     <div className="py-16 text-center">
@@ -77,10 +58,6 @@ function SearchEmptyState() {
   );
 }
 
-/**
- * No Results State Component
- * Shown when search query returns no results
- */
 function NoResultsState() {
   return (
     <div className="py-8 text-center">
@@ -93,10 +70,6 @@ function NoResultsState() {
   );
 }
 
-/**
- * Search Filter Controls Component
- * Dropdown menu for sorting and filtering options
- */
 function SearchFilterControls({
   sortBy,
   onSortChange,
@@ -152,10 +125,6 @@ function SearchFilterControls({
   );
 }
 
-/**
- * Search Results Display Component
- * Handles different states: empty, no results, or results list
- */
 function SearchResults({
   hasSearchQuery,
   filteredRepositories,
@@ -194,10 +163,6 @@ function SearchResults({
   );
 }
 
-/**
- * Repository Search Section Component
- * Complete search interface with input, filters, and results
- */
 export default function RepositorySearchSection(props: RepositorySearchSectionProps) {
   const {
     searchQuery,
@@ -221,7 +186,6 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Search Input and Filter Controls */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -244,7 +208,6 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
           )}
         </div>
 
-        {/* Search Results */}
         <SearchResults
           hasSearchQuery={hasSearchQuery}
           filteredRepositories={filteredRepositories}

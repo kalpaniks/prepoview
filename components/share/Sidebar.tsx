@@ -16,7 +16,6 @@ interface SidebarProps {
   analytics: ShareAnalytics;
 }
 
-
 function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
   return (
     <div className="space-y-4">
@@ -50,7 +49,6 @@ function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
     </div>
   );
 }
-
 
 function AnalyticsSection({ analytics }: { analytics: ShareAnalytics }) {
   return (

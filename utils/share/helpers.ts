@@ -1,10 +1,5 @@
-/**
- * Utility helper functions for repository sharing functionality
- * @fileoverview Common utility functions for the share dashboard
- */
-
 import { TIME_CONSTANTS, LANGUAGE_COLORS } from './constants';
-import type { Share, Repository, ShareStatus } from '@/types/share';
+import type { Share, Repository } from '@/types/share';
 
 /**
  * Calculates time remaining until expiration in human-readable format
@@ -127,12 +122,11 @@ export function sortRepositories(
       case 'name':
         return a.name.localeCompare(b.name);
       case 'updated':
-        return a.id - b.id; // Mock ordering - newest first
+        return a.id - b.id;
       case 'size':
-        // Simple size comparison for demo (convert MB to number)
-        const aSize = parseFloat(a.size);
-        const bSize = parseFloat(b.size);
-        return bSize - aSize; // Largest first
+        const aSize = parseFloat(a.size.toString());
+        const bSize = parseFloat(b.size.toString());
+        return bSize - aSize;
       default:
         return 0;
     }
@@ -152,8 +146,6 @@ export function filterRepositories(
   languageFilter: string
 ): Repository[] {
   let filtered = repositories;
-
-  // Apply search filter
   if (searchQuery.trim()) {
     const query = searchQuery.toLowerCase();
     filtered = filtered.filter(
@@ -161,11 +153,10 @@ export function filterRepositories(
         repo.name.toLowerCase().includes(query) ||
         repo.description.toLowerCase().includes(query) ||
         repo.language.toLowerCase().includes(query) ||
-        repo.owner.toLowerCase().includes(query)
+        repo.owner.login.toLowerCase().includes(query)
     );
   }
 
-  // Apply language filter
   if (languageFilter !== 'all') {
     filtered = filtered.filter((repo) => repo.language === languageFilter);
   }

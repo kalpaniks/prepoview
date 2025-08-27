@@ -1,8 +1,3 @@
-/**
- * Repository Sharing Dashboard Page
- * @fileoverview Main page component for the repository sharing dashboard
- */
-
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -10,17 +5,12 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Shield } from 'lucide-react';
 import { toast } from 'sonner';
-
-// Organized imports from our new structure
-import { useRepositorySearch, useShareManagement } from '@/hooks/share';
+import { useRepositorySearch } from '@/hooks/useRepositorySearch';
+import { useShareManagement } from '@/hooks/useShareManagement';
 import { Sidebar, RepositorySearchSection, ShareDialog, ShareTable } from '@/components/share';
-import { MOCK_REPOSITORIES, MOCK_SHARES, MOCK_GITHUB_PROFILE } from '@/utils/share';
 import type { Repository } from '@/types/share';
+import { useGithubProfileQuery, useReposQuery, useSharesQuery } from '@/hooks/queries';
 
-/**
- * Dashboard Header Component
- * Header section with title and global actions
- */
 function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
   return (
     <div className="border-border bg-card/30 border-b px-6 py-4">
@@ -48,22 +38,14 @@ function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
   );
 }
 
-/**
- * Main Share Dashboard Page Component
- * Orchestrates the entire sharing dashboard experience
- */
 export default function SharePage() {
-  // Dialog state
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-
-  // Custom hooks for state management
-  const shareManagement = useShareManagement(MOCK_SHARES);
-  const repositorySearch = useRepositorySearch(MOCK_REPOSITORIES);
-
-  /**
-   * Handles repository sharing workflow
-   */
+  const { data: repos } = useReposQuery();
+  const { data: shares } = useSharesQuery();
+  const shareManagement = useShareManagement(shares ?? []);
+  const repositorySearch = useRepositorySearch(repos ?? []);
+  const { data: githubProfile } = useGithubProfileQuery();
   const handleShareRepository = useCallback(
     (repository: Repository, email: string, expirationDays: number, viewLimit: number) => {
       shareManagement.createShare(repository, email, expirationDays, viewLimit);
@@ -75,9 +57,6 @@ export default function SharePage() {
     [shareManagement.createShare]
   );
 
-  /**
-   * Handles share deletion with confirmation toast
-   */
   const handleDeleteShare = useCallback(
     (shareId: number) => {
       shareManagement.deleteShare(shareId);
@@ -88,9 +67,6 @@ export default function SharePage() {
     [shareManagement.deleteShare]
   );
 
-  /**
-   * Handles copying share link to clipboard
-   */
   const handleCopyShareLink = useCallback((shareLink: string) => {
     navigator.clipboard.writeText(shareLink);
     toast.success('Link copied', {
@@ -98,25 +74,16 @@ export default function SharePage() {
     });
   }, []);
 
-  /**
-   * Opens share dialog for a specific repository
-   */
   const openShareDialog = useCallback((repository: Repository) => {
     setSelectedRepo(repository);
     setIsShareDialogOpen(true);
   }, []);
 
-  /**
-   * Closes share dialog and resets state
-   */
   const closeShareDialog = useCallback(() => {
     setIsShareDialogOpen(false);
     setSelectedRepo(null);
   }, []);
 
-  /**
-   * Handles revoking all shares with confirmation
-   */
   const handleRevokeAllShares = useCallback(() => {
     shareManagement.revokeAllShares();
     toast.error('All shares revoked', {
@@ -126,17 +93,12 @@ export default function SharePage() {
 
   return (
     <div className="bg-background flex h-screen">
-      {/* Enhanced Sidebar with GitHub Profile */}
-      <Sidebar profile={MOCK_GITHUB_PROFILE} analytics={shareManagement.analytics} />
+      <Sidebar profile={githubProfile} analytics={shareManagement.analytics} />
 
-      {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Header */}
         <DashboardHeader onRevokeAll={handleRevokeAllShares} />
 
-        {/* Main Content */}
         <div className="flex-1 space-y-6 overflow-auto p-6">
-          {/* Repository Search Section */}
           <RepositorySearchSection
             searchQuery={repositorySearch.searchQuery}
             onSearchChange={repositorySearch.setSearchQuery}
@@ -150,17 +112,15 @@ export default function SharePage() {
             onRepositoryShare={openShareDialog}
           />
 
-          {/* Active Shares Table */}
           <ShareTable
             shares={shareManagement.shares}
-            repositories={MOCK_REPOSITORIES}
+            repositories={repos ?? []}
             onDeleteShare={handleDeleteShare}
             onCopyShareLink={handleCopyShareLink}
           />
         </div>
       </div>
 
-      {/* Share Configuration Dialog */}
       <ShareDialog
         repository={selectedRepo}
         isOpen={isShareDialogOpen}

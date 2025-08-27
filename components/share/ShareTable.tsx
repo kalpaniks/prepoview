@@ -14,19 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Trash2,
-  ExternalLink,
-  Copy,
-  GitBranch,
-  Users,
-} from 'lucide-react';
+import { Trash2, ExternalLink, Copy, GitBranch, Users } from 'lucide-react';
 import type { Share, Repository } from '@/types/share';
 import {
   getTimeUntilExpiration,
   getViewsUsagePercentage,
   getShareStatusVariant,
-  formatDate
+  formatDate,
 } from '@/utils/share/helpers';
 
 interface ShareTableProps {
@@ -46,10 +40,10 @@ interface ShareTableProps {
  */
 function EmptyState() {
   return (
-    <div className="text-center py-8">
-      <Users className="mx-auto h-8 w-8 text-muted-foreground/50 mb-3" />
-      <h3 className="font-medium mb-1">No shares yet</h3>
-      <p className="text-sm text-muted-foreground">
+    <div className="py-8 text-center">
+      <Users className="text-muted-foreground/50 mx-auto mb-3 h-8 w-8" />
+      <h3 className="mb-1 font-medium">No shares yet</h3>
+      <p className="text-muted-foreground text-sm">
         Search for a repository above to create your first share
       </p>
     </div>
@@ -63,7 +57,7 @@ function EmptyState() {
 function ShareActions({
   share,
   onCopyLink,
-  onDelete
+  onDelete,
 }: {
   share: Share;
   onCopyLink: (link: string) => void;
@@ -93,7 +87,7 @@ function ShareActions({
         size="sm"
         variant="ghost"
         onClick={() => onDelete(share.id)}
-        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+        className="text-destructive hover:text-destructive h-8 w-8 p-0"
         title="Revoke share"
       >
         <Trash2 className="h-3 w-3" />
@@ -114,9 +108,9 @@ function UsageProgress({ share }: { share: Share }) {
       <span className="text-sm font-medium">
         {share.viewCount}/{share.viewLimit === 1000 ? '∞' : share.viewLimit}
       </span>
-      <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+      <div className="bg-muted h-1.5 w-16 overflow-hidden rounded-full">
         <div
-          className="h-full bg-primary rounded-full transition-all duration-300"
+          className="bg-primary h-full rounded-full transition-all duration-300"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -130,21 +124,19 @@ function UsageProgress({ share }: { share: Share }) {
  */
 function RepositoryInfo({
   repositoryName,
-  repositories
+  repositories,
 }: {
   repositoryName: string;
   repositories: Repository[];
 }) {
-  const repository = repositories.find(r => r.name === repositoryName);
+  const repository = repositories.find((r) => r.name === repositoryName);
 
   return (
     <div className="flex items-center gap-2">
-      <GitBranch className="h-4 w-4 text-muted-foreground" />
+      <GitBranch className="text-muted-foreground h-4 w-4" />
       <div>
-        <div className="font-medium text-sm">{repositoryName}</div>
-        <div className="text-xs text-muted-foreground">
-          {repository?.language || 'Unknown'}
-        </div>
+        <div className="text-sm font-medium">{repositoryName}</div>
+        <div className="text-muted-foreground text-xs">{repository?.language || 'Unknown'}</div>
       </div>
     </div>
   );
@@ -158,7 +150,7 @@ export default function ShareTable({
   shares,
   repositories,
   onDeleteShare,
-  onCopyShareLink
+  onCopyShareLink,
 }: ShareTableProps) {
   if (shares.length === 0) {
     return (
@@ -167,9 +159,7 @@ export default function ShareTable({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-lg">Active Shares</CardTitle>
-              <CardDescription>
-                Monitor and manage your repository sharing activity
-              </CardDescription>
+              <CardDescription>Monitor and manage your repository sharing activity</CardDescription>
             </div>
             <Badge variant="secondary" className="text-xs">
               0 active
@@ -189,12 +179,10 @@ export default function ShareTable({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg">Active Shares</CardTitle>
-            <CardDescription>
-              Monitor and manage your repository sharing activity
-            </CardDescription>
+            <CardDescription>Monitor and manage your repository sharing activity</CardDescription>
           </div>
           <Badge variant="secondary" className="text-xs">
-            {shares.filter(s => s.status === 'active').length} active
+            {shares.filter((s) => s.status === 'active').length} active
           </Badge>
         </div>
       </CardHeader>
@@ -227,17 +215,13 @@ export default function ShareTable({
                     <UsageProgress share={share} />
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={getShareStatusVariant(share)}
-                      className="text-xs"
-                    >
+                    <Badge variant={getShareStatusVariant(share)} className="text-xs">
                       {share.status === 'expired'
                         ? 'Expired'
-                        : getTimeUntilExpiration(share.expiresAt)
-                      }
+                        : getTimeUntilExpiration(share.expiresAt)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
                     {formatDate(share.createdAt)}
                   </TableCell>
                   <TableCell className="text-right">

@@ -1,26 +1,14 @@
-/**
- * Repository search result item component
- * @fileoverview Displays individual repository in search results
- */
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GitBranch, Plus } from 'lucide-react';
 import type { Repository } from '@/types/share';
 import { getLanguageColor } from '@/utils/share/helpers';
 
 interface RepositorySearchResultProps {
-  /** Repository data to display */
   repository: Repository;
-  /** Callback when share button is clicked */
   onShare: (repository: Repository) => void;
 }
 
-/**
- * Repository Search Result Component
- * Displays repository information in a card format with share action
- */
 export default function RepositorySearchResult({
   repository,
   onShare,
@@ -45,8 +33,8 @@ export default function RepositorySearchResult({
           <p className="text-muted-foreground line-clamp-1 text-xs">{repository.description}</p>
           <div className="text-muted-foreground mt-2 flex items-center gap-4 text-xs">
             <span>{repository.size}</span>
-            <span>Updated {repository.updatedAt}</span>
-            <span className="truncate">by {repository.owner}</span>
+            <span>Updated {repository.updatedAt.toLocaleDateString()}</span>
+            <span className="truncate">by {repository.owner.login}</span>
           </div>
         </div>
       </div>
