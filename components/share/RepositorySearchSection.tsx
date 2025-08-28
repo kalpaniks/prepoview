@@ -16,6 +16,8 @@ import type { Repository } from '@/types/share';
 import RepositorySearchResult from './RepositorySearchResult';
 
 interface RepositorySearchSectionProps {
+  isLoading: boolean;
+  isError: boolean;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   sortBy: 'name' | 'updated' | 'size';
@@ -165,6 +167,8 @@ function SearchResults({
 
 export default function RepositorySearchSection(props: RepositorySearchSectionProps) {
   const {
+    isLoading,
+    isError,
     searchQuery,
     onSearchChange,
     sortBy,
@@ -176,7 +180,7 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
     filteredRepositories,
     onRepositoryShare,
   } = props;
-
+  
   return (
     <Card>
       <CardHeader>

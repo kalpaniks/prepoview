@@ -1,9 +1,8 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { fetchGithubProfile, fetchUserRepos } from '@/lib/api/user';
-import { createShare, fetchUserShares } from '@/lib/api/share';
-import { CreateShareRequest } from '@/types/share';
+import { fetchUserShares } from '@/lib/api/share';
 
 export function useReposQuery() {
   return useQuery({
@@ -21,15 +20,6 @@ export function useSharesQuery() {
   });
 }
 
-export function useCreateShareMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (share: CreateShareRequest) => createShare(share),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shares'] });
-    },
-  });
-}
 
 export function useGithubProfileQuery() {
   return useQuery({

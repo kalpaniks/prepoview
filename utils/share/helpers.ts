@@ -6,9 +6,9 @@ import type { Share, Repository } from '@/types/share';
  * @param expiresAt - The expiration date
  * @returns Human-readable time remaining or "Expired"
  */
-export function getTimeUntilExpiration(expiresAt: Date): string {
+export function getTimeUntilExpiration(expiresAt?: Date): string {
   const now = new Date();
-  const diff = expiresAt.getTime() - now.getTime();
+  const diff = expiresAt ? expiresAt.getTime() - now.getTime() : 0;
 
   if (diff <= 0) return 'Expired';
 
@@ -65,15 +65,15 @@ export function getViewsUsagePercentage(viewCount: number, viewLimit: number): n
  * @param options - Intl.DateTimeFormat options
  * @returns Formatted date string
  */
-export function formatDate(date: Date, options?: Intl.DateTimeFormatOptions): string {
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  };
+// export function formatDate(date: Date, options?: Intl.DateTimeFormatOptions): string {
+//   const defaultOptions: Intl.DateTimeFormatOptions = {
+//     year: 'numeric',
+//     month: 'short',
+//     day: 'numeric',
+//   };
 
-  return date.toLocaleDateString('en-US', { ...defaultOptions, ...options });
-}
+//   return date.toLocaleDateString('en-US', { ...defaultOptions, ...options });
+// }
 
 /**
  * Formats GitHub join date for profile display
@@ -151,8 +151,8 @@ export function filterRepositories(
     filtered = filtered.filter(
       (repo) =>
         repo.name.toLowerCase().includes(query) ||
-        repo.description.toLowerCase().includes(query) ||
-        repo.language.toLowerCase().includes(query) ||
+        // repo.description.toLowerCase().includes(query) ||
+        repo.language?.toLowerCase().includes(query) ||
         repo.owner.login.toLowerCase().includes(query)
     );
   }

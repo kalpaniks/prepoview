@@ -1,8 +1,3 @@
-/**
- * Share management table component
- * @fileoverview Displays and manages active repository shares in a table format
- */
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,24 +15,17 @@ import {
   getTimeUntilExpiration,
   getViewsUsagePercentage,
   getShareStatusVariant,
-  formatDate,
+  formatGitHubJoinDate,
+  // formatDate,
 } from '@/utils/share/helpers';
 
 interface ShareTableProps {
-  /** Array of shares to display */
   shares: Share[];
-  /** Array of repositories for additional context */
   repositories: Repository[];
-  /** Callback when share is deleted */
   onDeleteShare: (shareId: number) => void;
-  /** Callback when share link is copied */
   onCopyShareLink: (shareLink: string) => void;
 }
 
-/**
- * Empty State Component
- * Shown when there are no shares to display
- */
 function EmptyState() {
   return (
     <div className="py-8 text-center">
@@ -50,10 +38,6 @@ function EmptyState() {
   );
 }
 
-/**
- * Share Actions Component
- * Action buttons for each share row (copy, open, delete)
- */
 function ShareActions({
   share,
   onCopyLink,
@@ -96,10 +80,6 @@ function ShareActions({
   );
 }
 
-/**
- * Usage Progress Component
- * Shows view count progress bar
- */
 function UsageProgress({ share }: { share: Share }) {
   const percentage = getViewsUsagePercentage(share.viewCount, share.viewLimit);
 
@@ -118,10 +98,6 @@ function UsageProgress({ share }: { share: Share }) {
   );
 }
 
-/**
- * Repository Info Component
- * Shows repository name and language in table cell
- */
 function RepositoryInfo({
   repositoryName,
   repositories,
@@ -142,10 +118,6 @@ function RepositoryInfo({
   );
 }
 
-/**
- * Share Table Component
- * Main table component for displaying and managing repository shares
- */
 export default function ShareTable({
   shares,
   repositories,
@@ -221,9 +193,9 @@ export default function ShareTable({
                         : getTimeUntilExpiration(share.expiresAt)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {formatDate(share.createdAt)}
-                  </TableCell>
+                  {/* <TableCell className="text-muted-foreground text-sm">
+                    {formatGitHubJoinDate(share.createdAt.toISOString())}
+                  </TableCell> */}
                   <TableCell className="text-right">
                     <ShareActions
                       share={share}

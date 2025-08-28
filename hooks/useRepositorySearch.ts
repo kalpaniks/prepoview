@@ -1,10 +1,5 @@
-/**
- * Custom hook for repository search and filtering functionality
- * @fileoverview Manages search state and filtering logic for repositories
- */
-
 import { useState, useMemo } from 'react';
-import type { Repository, RepositorySearchState } from '@/types/share';
+import type { Repository } from '@/types/share';
 import { filterRepositories, sortRepositories, getUniqueLanguages } from '@/utils/share/helpers';
 
 /**
@@ -13,7 +8,7 @@ import { filterRepositories, sortRepositories, getUniqueLanguages } from '@/util
  * @returns Search state and setter functions
  */
 export function useRepositorySearch(repositories: Repository[]) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'name' | 'updated' | 'size'>('updated');
   const [languageFilter, setLanguageFilter] = useState<string>('all');
 
@@ -22,7 +17,7 @@ export function useRepositorySearch(repositories: Repository[]) {
    * Only returns results if there's a search query (search-first UX)
    */
   const filteredAndSortedRepositories = useMemo(() => {
-    // Only show results if there's a search query
+    
     if (!searchQuery.trim()) {
       return [];
     }

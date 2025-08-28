@@ -21,7 +21,7 @@ import {
 import { GitBranch } from 'lucide-react';
 import type { Repository } from '@/types/share';
 import { DEFAULT_SHARE_CONFIG } from '@/utils/share/constants';
-import { useCreateShareMutation } from '@/hooks/queries';
+import { useCreateShare } from '@/hooks/useShareManagement';
 
 interface ShareDialogProps {
   repository: Repository | null;
@@ -49,7 +49,7 @@ export default function ShareDialog({ repository, isOpen, onClose, onShare }: Sh
   const [shareEmail, setShareEmail] = useState('');
   const [expirationDays, setExpirationDays] = useState(DEFAULT_SHARE_CONFIG.expirationDays);
   const [viewLimit, setViewLimit] = useState(DEFAULT_SHARE_CONFIG.viewLimit);
-  const mutateShare = useCreateShareMutation();
+  const mutateShare = useCreateShare();
   const isValidEmail = (email: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };

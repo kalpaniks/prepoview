@@ -1,145 +1,120 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CreateShareRequest, Share } from '@/types/share';
+import {
+  createShare,
+  updateShare,
+  deleteShare,
+  fetchUserShares,
+  fetchShare,
+} from '@/lib/api/share';
+import { validateShareRequest } from '@/services/shareService';
+import { toast } from 'sonner';
+
 /**
- * Custom hook for managing repository shares and analytics
- * @fileoverview Handles share creation, deletion, and analytics calculations
+ * Custom hook for fetching user shares
  */
-
-import { useState, useMemo, useCallback } from 'react';
-import type { Share, Repository, ShareAnalytics } from '@/types/share';
-import { generateShareId, isExpiringSoon } from '@/utils/share/helpers';
-import { TIME_CONSTANTS } from '@/utils/share/constants';
+export function useFetchShares() {
+  return useQuery({
+    queryKey: ['shares'],
+    queryFn: fetchUserShares,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
 
 /**
- * Custom hook for managing repository shares with analytics
- * @param initialShares - Initial array of shares
- * @returns Share management state and functions
+ * Custom hook for fetching a single share
  */
-export function useShareManagement(initialShares: Share[]) {
-  const [shares, setShares] = useState<Share[]>(initialShares);
+export function useFetchShare(id: string) {
+  return useQuery({
+    queryKey: ['share', id],
+    queryFn: () => fetchShare(id),
+    enabled: !!id,
+  });
+}
 
-  /**
-   * Creates a new repository share
-   * @param repository - Repository to share
-   * @param email - Recipient email address
-   * @param expirationDays - Number of days until expiration
-   * @param viewLimit - Maximum number of views allowed
-   * @returns The created share
-   */
-  const createShare = useCallback(
-    (repository: Repository, email: string, expirationDays: number, viewLimit: number) => {
-      const newShare: Share = {
-        id: Date.now(), // Better ID generation for demo
-        repositoryName: repository.name,
-        sharedWith: email,
-        expiresAt: new Date(Date.now() + expirationDays * TIME_CONSTANTS.DAY_IN_MS),
-        viewLimit,
-        viewCount: 0,
-        shareLink: `https://share.repo.com/${generateShareId()}`,
-        createdAt: new Date(),
-        status: 'active',
-      };
+/**
+ * Custom hook for creating a share
+ */
+export function useCreateShare() {
+  const queryClient = useQueryClient();
 
-      setShares((prev) => [newShare, ...prev]); // Add to beginning for recent-first order
-      return newShare;
+  return useMutation({
+    mutationFn: (shareData: CreateShareRequest) => {
+      const validation = validateShareRequest(shareData);
+      if (!validation.isValid) {
+        throw new Error(validation.errors.join(', '));
+      }
+      return createShare(shareData);
     },
-    []
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shares'] });
+      toast.success('Share created successfully!');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to create share: ${error.message}`);
+    },
+  });
+}
 
-  /**
-   * Deletes a share by ID
-   * @param shareId - ID of the share to delete
-   */
-  const deleteShare = useCallback((shareId: number) => {
-    setShares((prev) => prev.filter((share) => share.id !== shareId));
-  }, []);
+/**
+ * Custom hook for updating a share
+ */
+export function useUpdateShare() {
+  const queryClient = useQueryClient();
 
-  /**
-   * Revokes all active shares
-   */
-  const revokeAllShares = useCallback(() => {
-    setShares([]);
-  }, []);
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: number; updates: Partial<Share> }) =>
+      updateShare(id, updates),
+    onSuccess: (updatedShare) => {
+      queryClient.invalidateQueries({ queryKey: ['shares'] });
+      queryClient.setQueryData(['share', updatedShare.id.toString()], updatedShare);
+      toast.success('Share updated successfully!');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update share: ${error.message}`);
+    },
+  });
+}
 
-  /**
-   * Updates view count for a share
-   * @param shareId - ID of the share to update
-   */
-  const incrementViewCount = useCallback((shareId: number) => {
-    setShares((prev) =>
-      prev.map((share) =>
-        share.id === shareId ? { ...share, viewCount: share.viewCount + 1 } : share
-      )
-    );
-  }, []);
+/**
+ * Custom hook for deleting a share
+ */
+export function useDeleteShare() {
+  const queryClient = useQueryClient();
 
-  /**
-   * Extends expiration date for a share
-   * @param shareId - ID of the share to extend
-   * @param additionalDays - Number of additional days
-   */
-  const extendShareExpiration = useCallback((shareId: number, additionalDays: number) => {
-    setShares((prev) =>
-      prev.map((share) =>
-        share.id === shareId
-          ? {
-              ...share,
-              expiresAt: new Date(
-                share.expiresAt.getTime() + additionalDays * TIME_CONSTANTS.DAY_IN_MS
-              ),
-              status: 'active' as const,
-            }
-          : share
-      )
-    );
-  }, []);
+  return useMutation({
+    mutationFn: (id: number) => deleteShare(id),
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({ queryKey: ['shares'] });
+      queryClient.removeQueries({ queryKey: ['share', deletedId.toString()] });
+      toast.success('Share deleted successfully!');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete share: ${error.message}`);
+    },
+  });
+}
 
-  /**
-   * Computed analytics data
-   */
-  const analytics: ShareAnalytics = useMemo(() => {
-    const activeShares = shares.filter((share) => share.status === 'active');
-    const totalViews = shares.reduce((acc, share) => acc + share.viewCount, 0);
-    const expiringSoon = shares.filter(isExpiringSoon).length;
-
-    const thisWeekShares = shares.filter(
-      (share) => share.createdAt.getTime() > Date.now() - TIME_CONSTANTS.WEEK_IN_MS
-    ).length;
-
-    const recentActivity = shares
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, 5);
-
-    return {
-      activeShares: activeShares.length,
-      totalViews,
-      expiringSoon,
-      thisWeekShares,
-      recentActivity,
-    };
-  }, [shares]);
-
-  /**
-   * Filtered share lists for different views
-   */
-  const sharesByStatus = useMemo(
-    () => ({
-      active: shares.filter((share) => share.status === 'active'),
-      expired: shares.filter((share) => share.status === 'expired'),
-      revoked: shares.filter((share) => share.status === 'revoked'),
-    }),
-    [shares]
-  );
+/**
+ * Custom hook for share management operations
+ * Combines all share operations in one hook for convenience
+ */
+export function useShareManagement() {
+  const sharesQuery = useFetchShares();
+  const createShareMutation = useCreateShare();
+  const updateShareMutation = useUpdateShare();
+  const deleteShareMutation = useDeleteShare();
 
   return {
-    // State
-    shares,
-    analytics,
-    sharesByStatus,
-
-    // Actions
-    createShare,
-    deleteShare,
-    revokeAllShares,
-    incrementViewCount,
-    extendShareExpiration,
-  } as const;
+    shares: sharesQuery.data || [],
+    isLoading: sharesQuery.isLoading,
+    error: sharesQuery.error,
+    createShare: createShareMutation.mutate,
+    updateShare: updateShareMutation.mutate,
+    deleteShare: deleteShareMutation.mutate,
+    isCreating: createShareMutation.isPending,
+    isUpdating: updateShareMutation.isPending,
+    isDeleting: deleteShareMutation.isPending,
+    refetch: sharesQuery.refetch,
+  };
 }

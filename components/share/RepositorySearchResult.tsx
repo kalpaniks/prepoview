@@ -33,8 +33,8 @@ export default function RepositorySearchResult({
           <p className="text-muted-foreground line-clamp-1 text-xs">{repository.description}</p>
           <div className="text-muted-foreground mt-2 flex items-center gap-4 text-xs">
             <span>{repository.size}</span>
-            <span>Updated {repository.updatedAt.toLocaleDateString()}</span>
-            <span className="truncate">by {repository.owner.login}</span>
+            {/* <span>Updated {repository.updatedAt.toLocaleDateString()}</span> */}
+            <span className="truncate">by {repository?.owner?.login}</span>
           </div>
         </div>
       </div>

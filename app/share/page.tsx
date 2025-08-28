@@ -9,7 +9,7 @@ import { useRepositorySearch } from '@/hooks/useRepositorySearch';
 import { useShareManagement } from '@/hooks/useShareManagement';
 import { Sidebar, RepositorySearchSection, ShareDialog, ShareTable } from '@/components/share';
 import type { Repository } from '@/types/share';
-import { useGithubProfileQuery, useReposQuery, useSharesQuery } from '@/hooks/queries';
+import { useGithubProfileQuery, useReposQuery } from '@/hooks/queries';
 
 function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
   return (
@@ -41,14 +41,22 @@ function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
 export default function SharePage() {
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const { data: repos } = useReposQuery();
-  const { data: shares } = useSharesQuery();
-  const shareManagement = useShareManagement(shares ?? []);
+  const { data: repos, isLoading: isReposLoading , isError: isReposError} = useReposQuery();
+  const shareManagement = useShareManagement();
+
   const repositorySearch = useRepositorySearch(repos ?? []);
+
   const { data: githubProfile } = useGithubProfileQuery();
+
   const handleShareRepository = useCallback(
     (repository: Repository, email: string, expirationDays: number, viewLimit: number) => {
-      shareManagement.createShare(repository, email, expirationDays, viewLimit);
+      shareManagement.createShare({
+        repoOwner: repository.owner.login,
+        repoName: repository.name,
+        sharedWith: email,
+        expirationDays: expirationDays,
+        viewLimit: viewLimit,
+      });
 
       toast.success('Repository shared successfully', {
         description: `${repository.name} has been shared with ${email}`,
@@ -85,21 +93,22 @@ export default function SharePage() {
   }, []);
 
   const handleRevokeAllShares = useCallback(() => {
-    shareManagement.revokeAllShares();
     toast.error('All shares revoked', {
       description: 'All active shares have been invalidated',
     });
-  }, [shareManagement.revokeAllShares]);
+  }, []);
 
   return (
     <div className="bg-background flex h-screen">
-      <Sidebar profile={githubProfile} analytics={shareManagement.analytics} />
+      {/* <Sidebar profile={githubProfile} analytics={shareManagement.analytics} /> */}
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader onRevokeAll={handleRevokeAllShares} />
 
         <div className="flex-1 space-y-6 overflow-auto p-6">
           <RepositorySearchSection
+            isLoading={isReposLoading}
+            isError={isReposError}
             searchQuery={repositorySearch.searchQuery}
             onSearchChange={repositorySearch.setSearchQuery}
             sortBy={repositorySearch.sortBy}
