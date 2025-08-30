@@ -15,7 +15,6 @@ import {
   getTimeUntilExpiration,
   getViewsUsagePercentage,
   getShareStatusVariant,
-  formatGitHubJoinDate,
   // formatDate,
 } from '@/utils/share/helpers';
 
@@ -111,7 +110,7 @@ function RepositoryInfo({
     <div className="flex items-center gap-2">
       <GitBranch className="text-muted-foreground h-4 w-4" />
       <div>
-        <div className="text-sm font-medium">{repositoryName}</div>
+        <div className="text-sm font-medium">{repositoryName || 'showing'}</div>
         <div className="text-muted-foreground text-xs">{repository?.language || 'Unknown'}</div>
       </div>
     </div>
@@ -176,7 +175,7 @@ export default function ShareTable({
                 <TableRow key={share.id} className="group">
                   <TableCell>
                     <RepositoryInfo
-                      repositoryName={share.repositoryName}
+                      repositoryName={share.repoName}
                       repositories={repositories}
                     />
                   </TableCell>
@@ -193,9 +192,9 @@ export default function ShareTable({
                         : getTimeUntilExpiration(share.expiresAt)}
                     </Badge>
                   </TableCell>
-                  {/* <TableCell className="text-muted-foreground text-sm">
-                    {formatGitHubJoinDate(share.createdAt.toISOString())}
-                  </TableCell> */}
+                  <TableCell className="text-muted-foreground text-sm">
+                    {new Date(share.createdAt).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className="text-right">
                     <ShareActions
                       share={share}

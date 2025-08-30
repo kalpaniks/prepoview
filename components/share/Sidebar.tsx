@@ -13,7 +13,7 @@ interface SidebarProps {
   /** GitHub profile information */
   profile: GitHubProfile;
   /** Share analytics data */
-  analytics: ShareAnalytics;
+  analytics?: ShareAnalytics;
 }
 
 function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
@@ -23,8 +23,8 @@ function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
       <div className="flex items-start gap-4">
         <div className="relative">
           <img
-            src={profile.avatar_url}
-            alt={profile.name}
+            src={profile?.avatar_url}
+            alt={profile?.name}
             className="ring-border/50 h-16 w-16 rounded-full ring-2"
             onError={(e) => {
               // Fallback to emoji avatar if image fails to load
@@ -37,11 +37,11 @@ function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
         </div>
 
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg leading-tight font-semibold">{profile.name}</h2>
-          <p className="text-muted-foreground font-mono text-sm">@{profile.login}</p>
+          <h2 className="text-lg leading-tight font-semibold">{profile?.name}</h2>
+          <p className="text-muted-foreground font-mono text-sm">@{profile?.login}</p>
           <div className="mt-2 flex items-center gap-2">
             <Badge variant="outline" className="text-xs font-medium">
-              GitHub {profile.plan.name}
+              GitHub {profile?.plan?.name}
             </Badge>
           </div>
         </div>
@@ -212,7 +212,13 @@ function QuickActionsSection() {
  * Main Sidebar Component
  * Displays user profile, sharing analytics, and recent activity
  */
-export default function Sidebar({ profile, analytics }: SidebarProps) {
+export default function Sidebar({ profile, analytics = {
+  activeShares: 0,
+  totalViews: 0,
+  expiringSoon: 0,
+  thisWeekShares: 0,
+  recentActivity: [],
+} }: SidebarProps) {
   return (
     <div className="border-border bg-card/30 w-72 overflow-y-auto border-r">
       <div className="space-y-6 p-6">

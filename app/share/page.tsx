@@ -43,7 +43,6 @@ export default function SharePage() {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const { data: repos, isLoading: isReposLoading , isError: isReposError} = useReposQuery();
   const shareManagement = useShareManagement();
-
   const repositorySearch = useRepositorySearch(repos ?? []);
 
   const { data: githubProfile } = useGithubProfileQuery();
@@ -100,7 +99,7 @@ export default function SharePage() {
 
   return (
     <div className="bg-background flex h-screen">
-      {/* <Sidebar profile={githubProfile} analytics={shareManagement.analytics} /> */}
+      <Sidebar profile={githubProfile} />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader onRevokeAll={handleRevokeAllShares} />
