@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShareDetails } from '@/lib/share';
+import { getShareDetails, requireValidViewSession } from '@/lib/share';
 import { getBaseTree } from '@/lib/github';
 import { getDecryptedTokensForUser } from '@/lib/adapter';
 import prisma from '@/lib/prisma';
 
-// Define proper interface for GitHub API tree item response
 interface GitHubTreeItem {
   name: string;
   path: string;
@@ -12,59 +11,6 @@ interface GitHubTreeItem {
   sha: string;
   size?: number;
   download_url?: string;
-}
-
-export async function GET(req: NextRequest, { params }: { params: Promise<{ shareId: string }> }) {
-  const { shareId } = await params;
-  const directoryPath = req.nextUrl.searchParams.get('path');
-
-  if (!shareId) {
-    return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
-  }
-
-  try {
-    const share = await getShareDetails(shareId);
-    const accessToken = await getDecryptedTokensForUser(prisma, share.userId, 'github');
-
-    if (!accessToken?.access_token) {
-      return NextResponse.json({ error: 'Access token not found' }, { status: 400 });
-    }
-
-    let githubTreeResponse: GitHubTreeItem[];
-
-    if (directoryPath) {
-      githubTreeResponse = await fetchDirectoryContents(
-        share.repoName,
-        share.repoOwner,
-        accessToken.access_token,
-        directoryPath
-      );
-    } else {
-      githubTreeResponse = await getBaseTree(
-        share.repoName,
-        share.repoOwner,
-        accessToken.access_token
-      );
-    }
-
-    const transformedData = githubTreeResponse.map((item: GitHubTreeItem) => ({
-      name: item.name,
-      path: item.path,
-      type: item.type === 'file' ? 'file' : 'dir',
-      sha: item.sha,
-    }));
-
-    return NextResponse.json(transformedData);
-  } catch (error) {
-    console.error('Error fetching repository tree:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch repository tree',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
-  }
 }
 
 async function fetchDirectoryContents(
@@ -97,4 +43,67 @@ async function fetchDirectoryContents(
   }
 
   return data as GitHubTreeItem[];
+}
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ shareId: string }> }) {
+  const { shareId } = await params;
+  const directoryPath = req.nextUrl.searchParams.get('path');
+
+  if (!shareId) {
+    return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
+  }
+  const sessionId = req.cookies.get('viewer_session')?.value;
+  try {
+    await requireValidViewSession(shareId, sessionId);
+  } catch {
+    const response = NextResponse.json({ error: 'Access Denied' }, { status: 403 });
+    response.cookies.delete('viewer_session');
+    return response;
+  }
+
+  try {
+    const share = await getShareDetails(shareId);
+    const accessToken = await getDecryptedTokensForUser(prisma, share.userId, 'github');
+
+    if (!accessToken?.access_token) {
+      return NextResponse.json({ error: 'Access token not found' }, { status: 401});
+    }
+
+    let githubTreeResponse: GitHubTreeItem[];
+
+    if (directoryPath) {
+      githubTreeResponse = await fetchDirectoryContents(
+        share.repoName,
+        share.repoOwner,
+        accessToken.access_token,
+        directoryPath
+      );
+    } else {
+      githubTreeResponse = await getBaseTree(
+        share.repoName,
+        share.repoOwner,
+        accessToken.access_token
+      );
+    }
+
+    const transformedData = githubTreeResponse.map((item: GitHubTreeItem) => ({
+      name: item.name,
+      path: item.path,
+      type: item.type === 'file' ? 'file' : 'dir',
+      sha: item.sha,
+    }));
+
+    const response = NextResponse.json(transformedData);
+    response.headers.set('Cache-Control', 'no-store');
+    return response;
+  } catch (error) {
+    console.error('Error fetching repository tree:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch repository tree',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
 }
