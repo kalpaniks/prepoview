@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { updateShare } from '@/lib/api/share';
 
 interface ShareRequest {
   userId: string;
@@ -55,4 +56,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   });
 
   return NextResponse.json({ shareId }, { status: 201 });
+}
+
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const { id } = await request.json();
+  const share = await updateShare(id, { isActive: false });
+  return NextResponse.json(share);
 }

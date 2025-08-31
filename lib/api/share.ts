@@ -27,7 +27,7 @@ export async function createShare(share: CreateShareRequest) {
   return data as Share;
 }
 
-export async function updateShare(id: number, updates: Partial<Share>) {
+export async function updateShare(id: string, updates: Partial<Share>) {
   const response = await fetch(`/api/share/${id}`, {
     method: 'PATCH',
     headers: {

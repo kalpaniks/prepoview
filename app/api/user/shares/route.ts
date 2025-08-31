@@ -26,3 +26,5 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
   const shares = await getUserShares(session?.user?.id);
   return NextResponse.json(shares);
 }
+
+

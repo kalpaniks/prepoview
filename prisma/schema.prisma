@@ -55,4 +55,15 @@ model Share{
     expiresAt DateTime?
     createdAt DateTime @default(now())
     user User   @relation(fields: [userId], references: [id])
+    ViewerSession ViewerSession[]
+}
+
+model ViewerSession {
+  id        String   @id @default(cuid())
+  shareId   String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  share     Share    @relation(fields: [shareId], references: [id], onDelete: Cascade)
+
+  @@index([shareId, expiresAt])
 }
