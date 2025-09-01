@@ -68,5 +68,5 @@ export async function requireValidViewSession(shareId: string, sessionId?: strin
   if (session.expiresAt && session.expiresAt <= now) {
     throw new Error('Session has expired');
   }
-  return { valid: true };
+  return { hasAccess: true };
 }

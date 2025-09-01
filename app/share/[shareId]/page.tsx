@@ -2,6 +2,7 @@ import EditorViewLayout from '@/components/Editor/EditorViewLayout';
 import { Github, Calendar, FileText } from 'lucide-react';
 import { getShareDetails } from '@/lib/share';
 import Link from 'next/link';
+import { use, useEffect } from 'react';
 
 interface SharePageProps {
   params: Promise<{ shareId: string }>;

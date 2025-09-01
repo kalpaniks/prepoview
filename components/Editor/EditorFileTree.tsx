@@ -31,7 +31,10 @@ export default function EditorFileTree({ onFileSelect, selectedFile }: FileTreeP
         setIsInitialLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/share/${shareId}/tree`);
+        const response = await fetch(`/api/share/${shareId}/tree`, { credentials: 'include' });
+        if (response.status === 403) {
+          throw new Error('Access expired or limit reached');
+        }
         if (!response.ok) {
           throw new Error(`Failed to fetch repository: ${response.statusText}`);
         }

@@ -248,8 +248,13 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
 
       try {
         const response = await fetch(
-          `/api/share/${shareId}/file?filePath=${encodeURIComponent(filePath)}`
+          `/api/share/${shareId}/file?filePath=${encodeURIComponent(filePath)}`,
+          { credentials: 'include' }
         );
+
+        if (response.status === 403) {
+          throw new Error('Access expired or limit reached');
+        }
 
         if (!response.ok) {
           throw new Error(`Failed to fetch file: ${response.statusText}`);

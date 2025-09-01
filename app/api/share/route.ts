@@ -64,6 +64,6 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { id } = await request.json();
-  const share = await updateShare(id, { isActive: false });
+  const share = await updateShare(id, { expiresAt: new Date() });
   return NextResponse.json(share);
 }
