@@ -1,9 +1,8 @@
 import { getSession } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Share } from '@prisma/client';
 
-async function getUserShares(userId: string): Promise<Share[]> {
+async function getUserShares(userId: string) {
   try {
     const shares = await prisma.share.findMany({
       where: {
