@@ -6,29 +6,31 @@ import type { Share, Repository } from '@/types/share';
  * @param expiresAt - The expiration date
  * @returns Human-readable time remaining or "Expired"
  */
-export function getTimeUntilExpiration(expiresAt?: Date): string {
-  const now = new Date();
-  const diff = expiresAt ? expiresAt.getTime() - now.getTime() : 0;
+export function getTimeUntilExpiration(expiresAt?: Date | string | null): string {
+  const expiry = expiresAt ? new Date(expiresAt) : null;
+  const diff = expiry ? expiry.getTime() - Date.now() : 0;
 
   if (diff <= 0) return 'Expired';
 
   const days = Math.floor(diff / TIME_CONSTANTS.DAY_IN_MS);
   const hours = Math.floor((diff % TIME_CONSTANTS.DAY_IN_MS) / TIME_CONSTANTS.HOUR_IN_MS);
-
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h`;
+  const minutes = Math.floor((diff % TIME_CONSTANTS.HOUR_IN_MS) / 60000);
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m`;
   return 'Soon';
 }
 
 /**
- * Checks if a share is expiring within 24 hours
+ * Checks if a share is expiring within 1 hour
  * @param share - The share to check
- * @returns True if expiring within 24 hours
+ * @returns True if expiring within 1 hour
  */
 export function isExpiringSoon(share: Share): boolean {
-  return (
-    share.status === 'active' && share.expiresAt.getTime() - Date.now() < TIME_CONSTANTS.DAY_IN_MS
-  );
+  const expiry = (share as any).expiresAt ? new Date((share as any).expiresAt) : null;
+  if (!expiry) return false;
+  const diff = expiry.getTime() - Date.now();
+  return diff > 0 && diff < TIME_CONSTANTS.HOUR_IN_MS;
 }
 
 /**
@@ -97,14 +99,20 @@ export function truncateEmail(email: string): string {
 }
 
 /**
- * Determines the badge variant based on share status and expiration
- * @param share - The share to evaluate
- * @returns Badge variant string
+ * Determines the badge variant based on share expiration proximity
+ * - expired: destructive (red)
+ * - < 1 hour: warning (amber)
+ * - >= 1 hour: success (green)
  */
-export function getShareStatusVariant(share: Share): 'secondary' | 'destructive' {
-  if (share.status === 'expired') return 'destructive';
-  if (isExpiringSoon(share)) return 'destructive';
-  return 'secondary';
+export function getShareStatusVariant(
+  share: Share
+): 'secondary' | 'destructive' | 'warning' | 'success' {
+  const expiry = (share as any).expiresAt ? new Date((share as any).expiresAt) : null;
+  const diff = expiry ? expiry.getTime() - Date.now() : 0;
+
+  if (diff <= 0) return 'destructive';
+  if (diff < TIME_CONSTANTS.HOUR_IN_MS) return 'warning';
+  return 'success';
 }
 
 /**

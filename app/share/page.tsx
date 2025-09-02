@@ -10,6 +10,7 @@ import { useShareManagement } from '@/hooks/useShareManagement';
 import { Sidebar, RepositorySearchSection, ShareDialog, ShareTable } from '@/components/share';
 import type { Repository } from '@/types/share';
 import { useGithubProfileQuery, useReposQuery } from '@/hooks/queries';
+import { useShareAnalytics } from '@/hooks/useShareAnalytics';
 
 function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
   return (
@@ -44,8 +45,9 @@ export default function SharePage() {
   const { data: repos, isLoading: isReposLoading, isError: isReposError } = useReposQuery();
   const shareManagement = useShareManagement();
   const repositorySearch = useRepositorySearch(repos ?? []);
-
   const { data: githubProfile } = useGithubProfileQuery();
+
+  const analytics = useShareAnalytics(shareManagement.shares);
 
   const handleShareRepository = useCallback(
     (repository: Repository, email: string, expirationDays: number, viewLimit: number) => {
@@ -56,30 +58,12 @@ export default function SharePage() {
         expirationDays: expirationDays,
         viewLimit: viewLimit,
       });
-
       toast.success('Repository shared successfully', {
         description: `${repository.name} has been shared with ${email}`,
       });
     },
-    [shareManagement.createShare]
+    [shareManagement]
   );
-
-  const handleDeleteShare = useCallback(
-    (shareId: number) => {
-      shareManagement.deleteShare(shareId);
-      toast.success('Share revoked', {
-        description: 'Repository access has been revoked',
-      });
-    },
-    [shareManagement.deleteShare]
-  );
-
-  const handleCopyShareLink = useCallback((shareLink: string) => {
-    navigator.clipboard.writeText(shareLink);
-    toast.success('Link copied', {
-      description: 'Share link copied to clipboard',
-    });
-  }, []);
 
   const openShareDialog = useCallback((repository: Repository) => {
     setSelectedRepo(repository);
@@ -99,7 +83,7 @@ export default function SharePage() {
 
   return (
     <div className="bg-background flex h-screen">
-      <Sidebar profile={githubProfile} />
+      <Sidebar profile={githubProfile} analytics={analytics} />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader onRevokeAll={handleRevokeAllShares} />
@@ -120,12 +104,7 @@ export default function SharePage() {
             onRepositoryShare={openShareDialog}
           />
 
-          <ShareTable
-            shares={shareManagement.shares}
-            repositories={repos ?? []}
-            onDeleteShare={handleDeleteShare}
-            onCopyShareLink={handleCopyShareLink}
-          />
+          <ShareTable shares={shareManagement.shares} repositories={repos ?? []} />
         </div>
       </div>
 
@@ -133,7 +112,6 @@ export default function SharePage() {
         repository={selectedRepo}
         isOpen={isShareDialogOpen}
         onClose={closeShareDialog}
-        onShare={handleShareRepository}
       />
     </div>
   );

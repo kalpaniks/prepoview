@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Users, Activity, GitBranch, Clock, Settings, Shield } from 'lucide-react';
 import type { GitHubProfile, ShareAnalytics, Share } from '@/types/share';
 import { truncateEmail, isExpiringSoon } from '@/utils/share/helpers';
+import Image from 'next/image';
 
 interface SidebarProps {
   /** GitHub profile information */
@@ -22,17 +23,12 @@ function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
       {/* Avatar and Basic Info */}
       <div className="flex items-start gap-4">
         <div className="relative">
-          <img
-            src={profile?.avatar_url}
-            alt={profile?.name}
-            className="ring-border/50 h-16 w-16 rounded-full ring-2"
-            onError={(e) => {
-              // Fallback to emoji avatar if image fails to load
-              const target = e.currentTarget as HTMLImageElement;
-              target.style.display = 'none';
-              const fallback = target.nextElementSibling as HTMLElement;
-              if (fallback) fallback.classList.remove('hidden');
-            }}
+          <Image
+            src={profile?.avatar_url || ''}
+            alt={profile?.name || 'avatar'}
+            width={64}
+            height={64}
+            className="ring-border/50 h-16 w-16 rounded-full object-cover ring-2"
           />
         </div>
 
@@ -131,7 +127,7 @@ function RecentActivitySection({ recentActivity }: { recentActivity: Share[] }) 
             {/* Timeline line */}
             <div className="bg-border/50 absolute top-0 bottom-0 left-2 w-px" />
 
-            {recentActivity.map((share, index) => {
+            {recentActivity.map((share) => {
               const isExpired = share.status === 'expired';
               const isExpiringSoonFlag = isExpiringSoon(share);
 
@@ -152,7 +148,7 @@ function RecentActivitySection({ recentActivity }: { recentActivity: Share[] }) 
 
                   <div className="min-w-0 flex-1 pt-0.5">
                     <div className="mb-1 flex items-center gap-2">
-                      <span className="truncate text-sm font-medium">{share.repositoryName}</span>
+                      <span className="truncate text-sm font-medium">{share.repoName}</span>
                       <Badge
                         variant={
                           isExpired

@@ -27,13 +27,13 @@ export async function createViewSession(shareId: string, ttlMin = 30): Promise<V
   if (share.isExpired || !share.isActive || (share.expiresAt && share.expiresAt <= now)) {
     throw new Error('Share is expired');
   }
-  if (share.maxShares && share.totalShares >= share.maxShares) {
+  if (share.viewLimit && share.viewCount >= share.viewLimit) {
     throw new Error('Share has reached the maximum number of views');
   }
   const session = await prisma.$transaction(async (tx) => {
     await tx.share.update({
       where: { id: shareId },
-      data: { totalShares: { increment: 1 } },
+      data: { viewCount: { increment: 1 } },
     });
     return await tx.viewerSession.create({
       data: {
@@ -55,7 +55,7 @@ export async function requireValidViewSession(shareId: string, sessionId?: strin
   if (share.isExpired || !share.isActive || (share.expiresAt && share.expiresAt <= now)) {
     throw new Error('Share is expired');
   }
-  if (share.maxShares && share.totalShares >= share.maxShares) {
+  if (share.viewLimit && share.viewCount >= share.viewLimit) {
     throw new Error('Share has reached the maximum number of views');
   }
   if (!sessionId) {

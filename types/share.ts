@@ -54,7 +54,7 @@ export interface GitHubRepositoryResponse {
  */
 export interface Share {
   id: number;
-  repositoryName: string;
+  repoName: string;
   sharedWith: string;
   expiresAt: Date;
   viewLimit: number;

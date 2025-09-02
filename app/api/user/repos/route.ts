@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { GitHubRepositoryResponse, Repository } from '@/types/share';
 
 async function getUserRepos(accessToken: string): Promise<Repository[]> {
@@ -54,7 +54,7 @@ async function getUserRepos(accessToken: string): Promise<Repository[]> {
   }
 }
 
-export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   const session = await getSession();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

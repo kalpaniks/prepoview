@@ -7,7 +7,7 @@ interface ShareRequest {
   userId: string;
   repoName: string;
   repoOwner: string;
-  maxShares?: number;
+  viewLimit?: number;
   expiresAt?: Date;
   sharedWith?: string;
 }
@@ -18,7 +18,7 @@ async function createShare(shareRequest: ShareRequest): Promise<string> {
       data: {
         repoName: shareRequest.repoName,
         repoOwner: shareRequest.repoOwner,
-        maxShares: shareRequest.maxShares,
+        viewLimit: shareRequest.viewLimit,
         expiresAt: shareRequest.expiresAt,
         sharedWith: shareRequest.sharedWith,
         createdAt: new Date(),
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const { repoName, repoOwner, maxShares, expiresAt, sharedWith } = await request.json();
+  const { repoName, repoOwner, viewLimit, expiresAt, sharedWith } = await request.json();
   if (!repoName || !repoOwner) {
     return NextResponse.json({ error: 'Repo name and repo owner are required' }, { status: 400 });
   }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     userId: session.user.id,
     repoName,
     repoOwner,
-    maxShares,
+    viewLimit,
     expiresAt,
     sharedWith,
   });

@@ -8,7 +8,11 @@ export async function fetchUserShares() {
     throw new Error('Failed to fetch user shares');
   }
   const data = await response.json();
-  return data as Share[];
+  return data.map((s: Share) => ({
+    ...s,
+    createdAt: new Date(s.createdAt),
+    expiresAt: s.expiresAt ? new Date(s.expiresAt) : null,
+  })) as Share[];
 }
 
 export async function createShare(share: CreateShareRequest) {
@@ -61,5 +65,9 @@ export async function fetchShare(id: string) {
     throw new Error('Failed to fetch share');
   }
   const data = await response.json();
-  return data as Share;
+  return {
+    ...data,
+    createdAt: new Date(data.createdAt),
+    expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
+  } as Share;
 }

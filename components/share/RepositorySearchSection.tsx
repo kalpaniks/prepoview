@@ -73,15 +73,11 @@ function NoResultsState() {
 }
 
 function SearchFilterControls({
-  sortBy,
   onSortChange,
-  languageFilter,
   onLanguageFilterChange,
   availableLanguages,
 }: {
-  sortBy: 'name' | 'updated' | 'size';
   onSortChange: (sortBy: 'name' | 'updated' | 'size') => void;
-  languageFilter: string;
   onLanguageFilterChange: (language: string) => void;
   availableLanguages: string[];
 }) {
@@ -167,8 +163,6 @@ function SearchResults({
 
 export default function RepositorySearchSection(props: RepositorySearchSectionProps) {
   const {
-    isLoading,
-    isError,
     searchQuery,
     onSearchChange,
     sortBy,
@@ -203,9 +197,7 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
 
           {hasSearchQuery && (
             <SearchFilterControls
-              sortBy={sortBy}
               onSortChange={onSortChange}
-              languageFilter={languageFilter}
               onLanguageFilterChange={onLanguageFilterChange}
               availableLanguages={availableLanguages}
             />

@@ -63,7 +63,7 @@ export function useUpdateShare() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: number; updates: Partial<Share> }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Share> }) =>
       updateShare(id, updates),
     onSuccess: (updatedShare) => {
       queryClient.invalidateQueries({ queryKey: ['shares'] });

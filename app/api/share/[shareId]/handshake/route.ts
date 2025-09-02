@@ -18,7 +18,7 @@ export async function POST(
     });
     response.headers.set('Cache-Control', 'no-store');
     return response;
-  } catch (error) {
+  } catch {
     const res = NextResponse.json(
       { success: false, error: 'Failed to create view session' },
       { status: 500 }

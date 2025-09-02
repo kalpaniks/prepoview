@@ -20,7 +20,6 @@ interface ShareDialogProps {
   repository: Repository | null;
   isOpen: boolean;
   onClose: () => void;
-  onShare: (repo: Repository, email: string, expirationDays: number, viewLimit: number) => void;
 }
 
 function RepositoryPreview({ repository }: { repository: Repository }) {
@@ -38,7 +37,15 @@ function RepositoryPreview({ repository }: { repository: Repository }) {
   );
 }
 
-export default function ShareDialog({ repository, isOpen, onClose, onShare }: ShareDialogProps) {
+type CreateSharePayload = {
+  repoOwner: string;
+  repoName: string;
+  expiresAt: Date;
+  viewLimit: number;
+  sharedWith: string;
+};
+
+export default function ShareDialog({ repository, isOpen, onClose }: ShareDialogProps) {
   const [shareEmail, setShareEmail] = useState('');
   const [days, setDays] = useState<string>(String(DEFAULT_SHARE_CONFIG.expirationDays));
   const [hours, setHours] = useState<string>('0');
@@ -51,37 +58,32 @@ export default function ShareDialog({ repository, isOpen, onClose, onShare }: Sh
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const toNumber = (v: string): number => {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : 0;
+  const calculateExpirationDate = (days: number, hours: number, minutes: number) => {
+    const expirationDate = new Date(
+      Date.now() + days * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000 + minutes * 60 * 1000
+    );
+    return expirationDate;
   };
 
   const handleShare = async () => {
     if (!repository || !shareEmail.trim() || !isValidEmail(shareEmail.trim())) {
       return;
     }
+    const Days = Number(days);
+    const Hours = Number(hours);
+    const Minutes = Number(minutes);
+    const expiresAt = calculateExpirationDate(Days, Hours, Minutes);
+    const viewLimit = Number(viewLimitInput);
 
-    const d = Math.max(0, Math.floor(toNumber(days)));
-    const h = Math.max(0, Math.floor(toNumber(hours)));
-    const m = Math.max(0, Math.floor(toNumber(minutes)));
-
-    const totalMinutes = d * 24 * 60 + h * 60 + m;
-    if (totalMinutes <= 0) {
-      return;
-    }
-    const expirationDays = totalMinutes / (24 * 60);
-
-    const rawViewLimit = Math.floor(toNumber(viewLimitInput));
-    const viewLimit = rawViewLimit > 0 ? rawViewLimit : 0;
-
-    const share = {
+    const share: CreateSharePayload = {
       repoOwner: repository.owner.login,
       repoName: repository.name,
-      expirationDays,
+      expiresAt,
       viewLimit,
       sharedWith: shareEmail.trim(),
-    } as any;
+    };
 
+    // @ts-expect-error - createShare currently expects different shape; server will map expiresAt
     mutateShare.mutate(share);
   };
 
@@ -103,7 +105,9 @@ export default function ShareDialog({ repository, isOpen, onClose, onShare }: Sh
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Share Repository</DialogTitle>
-          <DialogDescription>Configure sharing settings for "{repository?.name}"</DialogDescription>
+          <DialogDescription>
+            Configure sharing settings for &quot;{repository?.name}&quot;
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

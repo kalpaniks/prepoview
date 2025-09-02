@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Share } from '@prisma/client';
 
@@ -17,7 +17,7 @@ async function getUserShares(userId: string): Promise<Share[]> {
   }
 }
 
-export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

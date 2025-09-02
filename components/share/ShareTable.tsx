@@ -1,3 +1,4 @@
+'use client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,12 +18,13 @@ import {
   getShareStatusVariant,
   // formatDate,
 } from '@/utils/share/helpers';
+import { toast } from 'sonner';
+import { useCallback } from 'react';
+import { useShareManagement } from '@/hooks/useShareManagement';
 
 interface ShareTableProps {
   shares: Share[];
   repositories: Repository[];
-  onDeleteShare: (shareId: number) => void;
-  onCopyShareLink: (shareLink: string) => void;
 }
 
 function EmptyState() {
@@ -51,7 +53,7 @@ function ShareActions({
       <Button
         size="sm"
         variant="ghost"
-        onClick={() => onCopyLink(share.shareLink)}
+        onClick={() => onCopyLink(`${window.location.origin}/share/${share.id}`)}
         className="h-8 w-8 p-0"
         title="Copy share link"
       >
@@ -60,7 +62,7 @@ function ShareActions({
       <Button
         size="sm"
         variant="ghost"
-        onClick={() => window.open(share.shareLink, '_blank')}
+        onClick={() => window.open(`${window.location.origin}/share/${share.id}`, '_blank')}
         className="h-8 w-8 p-0"
         title="Open share link"
       >
@@ -110,19 +112,33 @@ function RepositoryInfo({
     <div className="flex items-center gap-2">
       <GitBranch className="text-muted-foreground h-4 w-4" />
       <div>
-        <div className="text-sm font-medium">{repositoryName || 'showing'}</div>
+        <div className="text-sm font-medium">{repositoryName}</div>
         <div className="text-muted-foreground text-xs">{repository?.language || 'Unknown'}</div>
       </div>
     </div>
   );
 }
 
-export default function ShareTable({
-  shares,
-  repositories,
-  onDeleteShare,
-  onCopyShareLink,
-}: ShareTableProps) {
+export default function ShareTable({ shares, repositories }: ShareTableProps) {
+  const shareManagement = useShareManagement();
+
+  const handleCopyShareLink = useCallback((shareLink: string) => {
+    try {
+      navigator.clipboard.writeText(shareLink);
+      toast.success('Link copied', { description: 'Share link copied to clipboard' });
+    } catch {
+      toast.error('Failed to copy link');
+    }
+  }, []);
+
+  const handleDeleteShare = useCallback(
+    (shareId: number) => {
+      shareManagement.deleteShare(shareId);
+      toast.success('Share revoked', { description: 'Repository access has been revoked' });
+    },
+    [shareManagement]
+  );
+
   if (shares.length === 0) {
     return (
       <Card>
@@ -195,8 +211,8 @@ export default function ShareTable({
                   <TableCell className="text-right">
                     <ShareActions
                       share={share}
-                      onCopyLink={onCopyShareLink}
-                      onDelete={onDeleteShare}
+                      onCopyLink={handleCopyShareLink}
+                      onDelete={handleDeleteShare}
                     />
                   </TableCell>
                 </TableRow>

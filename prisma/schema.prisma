@@ -47,8 +47,8 @@ model Share{
     userId  String
     repoOwner String
     repoName String
-    maxShares Int?
-    totalShares Int @default(0)
+    viewLimit Int?
+    viewCount Int @default(0)
     isActive Boolean @default(true)
     isExpired Boolean @default(false)
     sharedWith String?
