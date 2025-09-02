@@ -45,25 +45,10 @@ export default function SharePage() {
   const { data: repos, isLoading: isReposLoading, isError: isReposError } = useReposQuery();
   const shareManagement = useShareManagement();
   const repositorySearch = useRepositorySearch(repos ?? []);
+
   const { data: githubProfile } = useGithubProfileQuery();
 
   const analytics = useShareAnalytics(shareManagement.shares);
-
-  const handleShareRepository = useCallback(
-    (repository: Repository, email: string, expirationDays: number, viewLimit: number) => {
-      shareManagement.createShare({
-        repoOwner: repository.owner.login,
-        repoName: repository.name,
-        sharedWith: email,
-        expirationDays: expirationDays,
-        viewLimit: viewLimit,
-      });
-      toast.success('Repository shared successfully', {
-        description: `${repository.name} has been shared with ${email}`,
-      });
-    },
-    [shareManagement]
-  );
 
   const openShareDialog = useCallback((repository: Repository) => {
     setSelectedRepo(repository);
