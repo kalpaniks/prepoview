@@ -20,7 +20,6 @@ export function useSharesQuery() {
   });
 }
 
-
 export function useGithubProfileQuery() {
   return useQuery({
     queryKey: ['githubProfile'],

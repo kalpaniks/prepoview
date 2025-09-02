@@ -212,13 +212,16 @@ function QuickActionsSection() {
  * Main Sidebar Component
  * Displays user profile, sharing analytics, and recent activity
  */
-export default function Sidebar({ profile, analytics = {
-  activeShares: 0,
-  totalViews: 0,
-  expiringSoon: 0,
-  thisWeekShares: 0,
-  recentActivity: [],
-} }: SidebarProps) {
+export default function Sidebar({
+  profile,
+  analytics = {
+    activeShares: 0,
+    totalViews: 0,
+    expiringSoon: 0,
+    thisWeekShares: 0,
+    recentActivity: [],
+  },
+}: SidebarProps) {
   return (
     <div className="border-border bg-card/30 w-72 overflow-y-auto border-r">
       <div className="space-y-6 p-6">

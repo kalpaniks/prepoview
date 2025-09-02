@@ -66,7 +66,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
     const accessToken = await getDecryptedTokensForUser(prisma, share.userId, 'github');
 
     if (!accessToken?.access_token) {
-      return NextResponse.json({ error: 'Access token not found' }, { status: 401});
+      return NextResponse.json({ error: 'Access token not found' }, { status: 401 });
     }
 
     let githubTreeResponse: GitHubTreeItem[];

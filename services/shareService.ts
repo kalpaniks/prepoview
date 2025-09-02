@@ -1,13 +1,11 @@
 import { CreateShareRequest, Share } from '@/types/share';
 
-
 export interface FormattedShare extends Share {
   formattedExpiryDate: string;
   isExpired: boolean;
   isExpiringSoon: boolean;
   remainingViews: number;
 }
-
 
 export function validateShareRequest(data: CreateShareRequest): {
   isValid: boolean;

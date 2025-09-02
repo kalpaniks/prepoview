@@ -41,7 +41,7 @@ function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
 export default function SharePage() {
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const { data: repos, isLoading: isReposLoading , isError: isReposError} = useReposQuery();
+  const { data: repos, isLoading: isReposLoading, isError: isReposError } = useReposQuery();
   const shareManagement = useShareManagement();
   const repositorySearch = useRepositorySearch(repos ?? []);
 

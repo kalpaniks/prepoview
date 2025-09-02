@@ -17,7 +17,6 @@ export function useRepositorySearch(repositories: Repository[]) {
    * Only returns results if there's a search query (search-first UX)
    */
   const filteredAndSortedRepositories = useMemo(() => {
-    
     if (!searchQuery.trim()) {
       return [];
     }

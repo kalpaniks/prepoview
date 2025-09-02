@@ -1,30 +1,27 @@
-import { getSession } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { Share } from "@prisma/client";
+import { getSession } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { Share } from '@prisma/client';
 
 async function getUserShares(userId: string): Promise<Share[]> {
   try {
     const shares = await prisma.share.findMany({
       where: {
         userId: userId,
-      }
-    })
+      },
+    });
     return shares;
-  }catch(error){
-    console.error("Error fetching user shares:", error);
-    throw new Error("Failed to fetch user shares");
+  } catch (error) {
+    console.error('Error fetching user shares:', error);
+    throw new Error('Failed to fetch user shares');
   }
 }
 
-
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
   const session = await getSession();
-  if(!session){
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const shares = await getUserShares(session?.user?.id);
   return NextResponse.json(shares);
 }
-
-

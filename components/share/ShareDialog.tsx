@@ -4,13 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -47,37 +40,63 @@ function RepositoryPreview({ repository }: { repository: Repository }) {
 
 export default function ShareDialog({ repository, isOpen, onClose, onShare }: ShareDialogProps) {
   const [shareEmail, setShareEmail] = useState('');
-  const [expirationDays, setExpirationDays] = useState(DEFAULT_SHARE_CONFIG.expirationDays);
-  const [viewLimit, setViewLimit] = useState(DEFAULT_SHARE_CONFIG.viewLimit);
+  const [days, setDays] = useState<string>(String(DEFAULT_SHARE_CONFIG.expirationDays));
+  const [hours, setHours] = useState<string>('0');
+  const [minutes, setMinutes] = useState<string>('0');
+  const [viewLimitInput, setViewLimitInput] = useState<string>(
+    String(DEFAULT_SHARE_CONFIG.viewLimit)
+  );
   const mutateShare = useCreateShare();
   const isValidEmail = (email: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const toNumber = (v: string): number => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
   };
 
   const handleShare = async () => {
     if (!repository || !shareEmail.trim() || !isValidEmail(shareEmail.trim())) {
       return;
     }
+
+    const d = Math.max(0, Math.floor(toNumber(days)));
+    const h = Math.max(0, Math.floor(toNumber(hours)));
+    const m = Math.max(0, Math.floor(toNumber(minutes)));
+
+    const totalMinutes = d * 24 * 60 + h * 60 + m;
+    if (totalMinutes <= 0) {
+      return;
+    }
+    const expirationDays = totalMinutes / (24 * 60);
+
+    const rawViewLimit = Math.floor(toNumber(viewLimitInput));
+    const viewLimit = rawViewLimit > 0 ? rawViewLimit : 0;
+
     const share = {
       repoOwner: repository.owner.login,
       repoName: repository.name,
-      expirationDays: Number.parseInt(expirationDays),
-      viewLimit: Number.parseInt(viewLimit),
+      expirationDays,
+      viewLimit,
       sharedWith: shareEmail.trim(),
-    };
+    } as any;
+
     mutateShare.mutate(share);
   };
 
   const handleClose = () => {
     if (!mutateShare.isPending) {
       setShareEmail('');
-      setExpirationDays(DEFAULT_SHARE_CONFIG.expirationDays);
-      setViewLimit(DEFAULT_SHARE_CONFIG.viewLimit);
+      setDays(String(DEFAULT_SHARE_CONFIG.expirationDays));
+      setHours('0');
+      setMinutes('0');
+      setViewLimitInput(String(DEFAULT_SHARE_CONFIG.viewLimit));
       onClose();
     }
   };
 
-  const isFormValid = shareEmail.trim() && isValidEmail(shareEmail.trim());
+  const isFormValid = !!(shareEmail.trim() && isValidEmail(shareEmail.trim()));
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -105,39 +124,58 @@ export default function ShareDialog({ repository, isOpen, onClose, onShare }: Sh
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="expiration">Access Duration</Label>
-              <Select
-                value={expirationDays}
-                disabled={mutateShare.isPending}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 day</SelectItem>
-                  <SelectItem value="3">3 days</SelectItem>
-                  <SelectItem value="7">1 week</SelectItem>
-                  <SelectItem value="14">2 weeks</SelectItem>
-                  <SelectItem value="30">1 month</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="col-span-2 space-y-2">
+              <Label>Access Duration (Days : Hours : Minutes)</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  inputMode="numeric"
+                  type="number"
+                  min={0}
+                  value={days}
+                  onChange={(e) => setDays(e.target.value)}
+                  disabled={mutateShare.isPending}
+                  placeholder="Days"
+                  className="w-24"
+                />
+                <span>:</span>
+                <Input
+                  inputMode="numeric"
+                  type="number"
+                  min={0}
+                  max={23}
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  disabled={mutateShare.isPending}
+                  placeholder="Hours"
+                  className="w-24"
+                />
+                <span>:</span>
+                <Input
+                  inputMode="numeric"
+                  type="number"
+                  min={0}
+                  max={59}
+                  value={minutes}
+                  onChange={(e) => setMinutes(e.target.value)}
+                  disabled={mutateShare.isPending}
+                  placeholder="Minutes"
+                  className="w-24"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="viewLimit">View Limit</Label>
-              <Select value={viewLimit} disabled={mutateShare.isPending}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 view</SelectItem>
-                  <SelectItem value="5">5 views</SelectItem>
-                  <SelectItem value="10">10 views</SelectItem>
-                  <SelectItem value="25">25 views</SelectItem>
-                  <SelectItem value="unlimited">Unlimited</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                id="viewLimit"
+                inputMode="numeric"
+                type="number"
+                min={1}
+                value={viewLimitInput}
+                onChange={(e) => setViewLimitInput(e.target.value)}
+                disabled={mutateShare.isPending}
+                placeholder="e.g. 5"
+              />
             </div>
           </div>
 

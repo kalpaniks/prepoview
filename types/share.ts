@@ -14,7 +14,7 @@ export interface Repository {
   language: string;
   private: boolean;
   url: string;
-  htmlUrl : string ;
+  htmlUrl: string;
   owner: {
     login: string;
     avatarUrl: string;

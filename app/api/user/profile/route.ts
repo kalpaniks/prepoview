@@ -1,7 +1,7 @@
-import { getDecryptedTokensForUser } from "@/lib/adapter";
-import { getSession } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { getDecryptedTokensForUser } from '@/lib/adapter';
+import { getSession } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import { NextResponse } from 'next/server';
 
 export async function GET(): Promise<NextResponse> {
   const session = await getSession();
@@ -14,7 +14,7 @@ export async function GET(): Promise<NextResponse> {
   }
   const response = await fetch(`https://api.github.com/user`, {
     headers: {
-      'Authorization': `Bearer ${userTokens.access_token}`,
+      Authorization: `Bearer ${userTokens.access_token}`,
     },
   });
   const data = await response.json();

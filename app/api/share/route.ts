@@ -14,21 +14,21 @@ interface ShareRequest {
 
 async function createShare(shareRequest: ShareRequest): Promise<string> {
   try {
-  const share = await prisma.share.create({
-    data: {
-      repoName: shareRequest.repoName,
-      repoOwner: shareRequest.repoOwner,
-      maxShares: shareRequest.maxShares,
-      expiresAt: shareRequest.expiresAt,
-      sharedWith: shareRequest.sharedWith,
-      createdAt: new Date(),
-      user: {
-        connect: {
-          id: shareRequest.userId,
+    const share = await prisma.share.create({
+      data: {
+        repoName: shareRequest.repoName,
+        repoOwner: shareRequest.repoOwner,
+        maxShares: shareRequest.maxShares,
+        expiresAt: shareRequest.expiresAt,
+        sharedWith: shareRequest.sharedWith,
+        createdAt: new Date(),
+        user: {
+          connect: {
+            id: shareRequest.userId,
+          },
         },
       },
-    },
-  });
+    });
     return share.id;
   } catch (error) {
     console.error('Error creating share:', error);

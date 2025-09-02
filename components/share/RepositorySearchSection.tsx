@@ -180,7 +180,7 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
     filteredRepositories,
     onRepositoryShare,
   } = props;
-  
+
   return (
     <Card>
       <CardHeader>

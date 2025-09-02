@@ -39,7 +39,7 @@ export async function createViewSession(shareId: string, ttlMin = 30): Promise<V
       data: {
         shareId,
         expiresAt: new Date(now.getTime() + ttlMin * 60 * 1000),
-      }
+      },
     });
   });
   return session;

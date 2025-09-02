@@ -41,7 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <QueryProvider>
-              {children}
+            {children}
             <Toaster />
           </QueryProvider>
         </ThemeProvider>

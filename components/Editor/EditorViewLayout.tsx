@@ -19,13 +19,21 @@ export default function EditorViewLayout({ shareData }: EditorViewLayoutProps) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await fetch(`/api/share/${shareData.shareId}/handshake`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (cancelled) return;
-      const data = await res.json();
-      setAccess(data.success ? 'granted' : 'denied');
+      try {
+        const res = await fetch(`/api/share/${shareData.shareId}/handshake`, {
+          method: 'POST',
+          credentials: 'include',
+          cache: 'no-store',
+        });
+        if (cancelled) return;
+        if (!res.ok) {
+          setAccess('denied');
+          return;
+        }
+        setAccess('granted');
+      } catch {
+        if (!cancelled) setAccess('denied');
+      }
     })();
     return () => {
       cancelled = true;
@@ -34,19 +42,29 @@ export default function EditorViewLayout({ shareData }: EditorViewLayoutProps) {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const res = await fetch(`/api/share/${shareData.shareId}/status`, {
-        credentials: 'include',
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAccess(data.hasAccess ? 'granted' : 'denied');
+      try {
+        const res = await fetch(`/api/share/${shareData.shareId}/status?ts=${Date.now()}`, {
+          credentials: 'include',
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          setAccess('granted');
+        } else {
+          setAccess('denied');
+        }
+      } catch {
+        setAccess('denied');
       }
     }, 60 * 1000);
     return () => clearInterval(interval);
   }, [shareData.shareId]);
 
-  if (access === 'checking') return <div className="p-6">Checking access…</div>;
-  if (access === 'denied') return <div className="p-6">Access expired or limit reached.</div>;
+  if (access === 'checking') {
+    return <div className="p-6">Checking access…</div>;
+  }
+  if (access === 'denied') {
+    return <div className="p-6">Access expired or limit reached.</div>;
+  }
 
   const handleFileSelect = (filePath: string) => {
     setSelectedFile(filePath);

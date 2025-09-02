@@ -13,14 +13,12 @@ export const LANGUAGE_COLORS: Record<string, string> = {
   Ruby: 'bg-red-600',
 } as const;
 
-
 export const DEFAULT_SHARE_CONFIG = {
   expirationDays: '7',
   viewLimit: '10',
   maxSharesPerRepo: 10,
   maxConcurrentShares: 50,
 } as const;
-
 
 export const TIME_CONSTANTS = {
   HOUR_IN_MS: 60 * 60 * 1000,

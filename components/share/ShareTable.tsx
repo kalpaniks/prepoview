@@ -174,10 +174,7 @@ export default function ShareTable({
               {shares.map((share) => (
                 <TableRow key={share.id} className="group">
                   <TableCell>
-                    <RepositoryInfo
-                      repositoryName={share.repoName}
-                      repositories={repositories}
-                    />
+                    <RepositoryInfo repositoryName={share.repoName} repositories={repositories} />
                   </TableCell>
                   <TableCell>
                     <div className="font-mono text-sm">{share.sharedWith}</div>
