@@ -165,7 +165,6 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
   const {
     searchQuery,
     onSearchChange,
-    sortBy,
     onSortChange,
     languageFilter,
     onLanguageFilterChange,
