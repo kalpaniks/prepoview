@@ -84,7 +84,11 @@ function SearchFilterControls({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="flex shrink-0 items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-border/60 flex shrink-0 items-center gap-2"
+        >
           <Filter className="h-4 w-4" />
           Filter & Sort
           <ChevronDown className="h-4 w-4" />
@@ -175,7 +179,7 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
   } = props;
 
   return (
-    <Card>
+    <Card className="bg-card/40 border-border/60">
       {/* <CardHeader>
         <CardTitle className="text-lg">Find Repository to Share</CardTitle>
         <CardDescription>
@@ -185,12 +189,12 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Search className="text-muted-foreground/60 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder="Search repositories by name, description, or language..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10"
+              className="bg-input/30 border-border/60 pl-10"
             />
           </div>
 

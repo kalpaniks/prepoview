@@ -141,11 +141,11 @@ export default function ShareTable({ shares, repositories }: ShareTableProps) {
 
   if (shares.length === 0) {
     return (
-      <Card>
+      <Card className="bg-card/40 border-border/60">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Active Shares</CardTitle>
+              <CardTitle className="text-lg">Shares</CardTitle>
               <CardDescription>Monitor and manage your repository sharing activity</CardDescription>
             </div>
             <Badge variant="secondary" className="text-xs">
@@ -161,12 +161,12 @@ export default function ShareTable({ shares, repositories }: ShareTableProps) {
   }
 
   return (
-    <Card>
+    <Card className="bg-card/40 border-border/60">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg">Active Shares</CardTitle>
-            <CardDescription>Monitor and manage your repository sharing activity</CardDescription>
+            <CardTitle className="text-lg">Shares</CardTitle>
+            <CardDescription>Monitor your repository sharing activity</CardDescription>
           </div>
           <Badge variant="secondary" className="text-xs">
             {shares.filter((s) => s.status === 'active').length} active
@@ -174,10 +174,10 @@ export default function ShareTable({ shares, repositories }: ShareTableProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg border">
+        <div className="border-border/60 rounded-sm border px-4 sm:px-6">
           <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
+            <TableHeader className="px-6">
+              <TableRow>
                 <TableHead>Repository</TableHead>
                 <TableHead>Shared with</TableHead>
                 <TableHead>Usage</TableHead>
@@ -186,7 +186,7 @@ export default function ShareTable({ shares, repositories }: ShareTableProps) {
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="px-6">
               {shares.map((share) => (
                 <TableRow key={share.id} className="group">
                   <TableCell>

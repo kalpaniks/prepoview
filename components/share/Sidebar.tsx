@@ -57,7 +57,7 @@ function AnalyticsSection({ analytics }: { analytics: ShareAnalytics }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-muted/30 border-border/50 rounded-lg border p-3">
+        <div className="bg-muted/30 border-border/60 rounded-md border p-3">
           <div className="mb-1 flex items-center justify-between">
             <Users className="h-4 w-4 text-blue-500" />
             <span className="text-lg font-bold">{analytics.activeShares}</span>
@@ -65,7 +65,7 @@ function AnalyticsSection({ analytics }: { analytics: ShareAnalytics }) {
           <p className="text-muted-foreground text-xs">Active shares</p>
         </div>
 
-        <div className="bg-muted/30 border-border/50 rounded-lg border p-3">
+        <div className="bg-muted/30 border-border/60 rounded-md border p-3">
           <div className="mb-1 flex items-center justify-between">
             <Activity className="h-4 w-4 text-green-500" />
             <span className="text-lg font-bold">{analytics.totalViews}</span>
@@ -73,7 +73,7 @@ function AnalyticsSection({ analytics }: { analytics: ShareAnalytics }) {
           <p className="text-muted-foreground text-xs">Total views</p>
         </div>
 
-        <div className="bg-muted/30 border-border/50 rounded-lg border p-3">
+        <div className="bg-muted/30 border-border/60 rounded-md border p-3">
           <div className="mb-1 flex items-center justify-between">
             <Clock className="h-4 w-4 text-orange-500" />
             <span className="text-lg font-bold">{analytics.expiringSoon}</span>
@@ -81,7 +81,7 @@ function AnalyticsSection({ analytics }: { analytics: ShareAnalytics }) {
           <p className="text-muted-foreground text-xs">Expiring soon</p>
         </div>
 
-        <div className="bg-muted/30 border-border/50 rounded-lg border p-3">
+        <div className="bg-muted/30 border-border/60 rounded-md border p-3">
           <div className="mb-1 flex items-center justify-between">
             <GitBranch className="h-4 w-4 text-purple-500" />
             <span className="text-lg font-bold">{analytics.thisWeekShares}</span>
@@ -92,7 +92,7 @@ function AnalyticsSection({ analytics }: { analytics: ShareAnalytics }) {
 
       {/* Expiring Soon Alert */}
       {analytics.expiringSoon > 0 && (
-        <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 dark:border-orange-800/30 dark:bg-orange-950/20">
+        <div className="rounded-md border border-orange-200 bg-orange-50 p-3 dark:border-orange-800/30 dark:bg-orange-950/20">
           <div className="mb-1 flex items-center gap-2">
             <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
             <span className="text-sm font-medium text-orange-900 dark:text-orange-100">
@@ -189,13 +189,13 @@ function RecentActivitySection({ recentActivity }: { recentActivity: Share[] }) 
  */
 function QuickActionsSection() {
   return (
-    <div className="space-y-3">
-      <div className="border-border/50 border-t pt-4">
+    <div className="border-border/50 bg-card/30 sticky bottom-0 mt-auto border-t px-6 pt-4 pb-4">
+      <div className="space-y-1.5">
         <Button variant="ghost" className="h-8 w-full justify-start text-sm" size="sm">
           <Settings className="mr-2 h-4 w-4" />
           Sharing Settings
         </Button>
-        <Button variant="ghost" className="mt-1 h-8 w-full justify-start text-sm" size="sm">
+        <Button variant="ghost" className="h-8 w-full justify-start text-sm" size="sm">
           <Shield className="mr-2 h-4 w-4" />
           Security & Permissions
         </Button>
@@ -219,8 +219,8 @@ export default function Sidebar({
   },
 }: SidebarProps) {
   return (
-    <div className="border-border bg-card/30 w-72 overflow-y-auto border-r">
-      <div className="space-y-6 p-6">
+    <div className="border-border/60 bg-card/30 w-72 overflow-y-auto border-r">
+      <div className="flex h-full flex-col space-y-6 p-6">
         {/* GitHub Profile Section */}
         <GitHubProfileSection profile={profile} />
 
