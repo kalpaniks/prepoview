@@ -14,14 +14,8 @@ import { useShareAnalytics } from '@/hooks/useShareAnalytics';
 
 function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
   return (
-    <div className="border-border bg-card/30 border-b px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Repository Sharing</h1>
-          <p className="text-muted-foreground text-sm">
-            Share private repositories securely with external collaborators
-          </p>
-        </div>
+    <div className="border-border/60 bg-card/40 border-b px-6 py-4">
+      <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <Button

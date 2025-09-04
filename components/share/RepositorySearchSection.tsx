@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -32,10 +32,10 @@ interface RepositorySearchSectionProps {
 
 function SearchEmptyState() {
   return (
-    <div className="py-16 text-center">
+    <div className="py-8 text-center">
       <div className="relative mb-6">
         <Search className="text-muted-foreground/20 mx-auto h-16 w-16" />
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-2xl" />
+        {/* <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-2xl" /> */}
       </div>
       <h3 className="mb-3 text-xl font-semibold">Find repositories to share</h3>
       <p className="text-muted-foreground mx-auto mb-6 max-w-lg text-sm leading-relaxed">
@@ -176,12 +176,12 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
 
   return (
     <Card>
-      <CardHeader>
+      {/* <CardHeader>
         <CardTitle className="text-lg">Find Repository to Share</CardTitle>
         <CardDescription>
           Search through your private repositories to share with collaborators
         </CardDescription>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="relative flex-1">
