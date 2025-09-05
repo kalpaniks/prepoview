@@ -20,11 +20,11 @@ import {
 } from '@/utils/share/helpers';
 import { toast } from 'sonner';
 import { useCallback } from 'react';
-import { useShareManagement } from '@/hooks/useShareManagement';
 
 interface ShareTableProps {
   shares: Share[];
   repositories: Repository[];
+  onDeleteShare: (id: number) => void;
 }
 
 function EmptyState() {
@@ -42,11 +42,11 @@ function EmptyState() {
 function ShareActions({
   share,
   onCopyLink,
-  onDelete,
+  onDeleteShare,
 }: {
   share: Share;
   onCopyLink: (link: string) => void;
-  onDelete: (id: number) => void;
+  onDeleteShare: (id: number) => void;
 }) {
   return (
     <div className="flex translate-x-2 items-center justify-end gap-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
@@ -71,7 +71,7 @@ function ShareActions({
       <Button
         size="sm"
         variant="ghost"
-        onClick={() => onDelete(share.id)}
+        onClick={() => onDeleteShare(share.id)}
         className="text-destructive hover:text-destructive h-8 w-8 p-0"
         title="Revoke share"
       >
@@ -119,9 +119,7 @@ function RepositoryInfo({
   );
 }
 
-export default function ShareTable({ shares, repositories }: ShareTableProps) {
-  const shareManagement = useShareManagement();
-
+export default function ShareTable({ shares, repositories, onDeleteShare }: ShareTableProps) {
   const handleCopyShareLink = useCallback((shareLink: string) => {
     try {
       navigator.clipboard.writeText(shareLink);
@@ -133,10 +131,10 @@ export default function ShareTable({ shares, repositories }: ShareTableProps) {
 
   const handleDeleteShare = useCallback(
     (shareId: number) => {
-      shareManagement.deleteShare(shareId);
+      onDeleteShare(shareId);
       toast.success('Share revoked', { description: 'Repository access has been revoked' });
     },
-    [shareManagement]
+    [onDeleteShare]
   );
 
   if (shares.length === 0) {
@@ -212,7 +210,7 @@ export default function ShareTable({ shares, repositories }: ShareTableProps) {
                     <ShareActions
                       share={share}
                       onCopyLink={handleCopyShareLink}
-                      onDelete={handleDeleteShare}
+                      onDeleteShare={handleDeleteShare}
                     />
                   </TableCell>
                 </TableRow>

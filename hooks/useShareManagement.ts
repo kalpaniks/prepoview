@@ -9,32 +9,24 @@ import {
 } from '@/lib/api/share';
 import { validateShareRequest } from '@/services/shareService';
 import { toast } from 'sonner';
+import { queryKeys } from '@/lib/queryKeys';
 
-/**
- * Custom hook for fetching user shares
- */
 export function useFetchShares() {
   return useQuery({
-    queryKey: ['shares'],
+    queryKey: queryKeys.shares,
     queryFn: fetchUserShares,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
-/**
- * Custom hook for fetching a single share
- */
 export function useFetchShare(id: string) {
   return useQuery({
-    queryKey: ['share', id],
+    queryKey: queryKeys.share(id),
     queryFn: () => fetchShare(id),
     enabled: !!id,
   });
 }
 
-/**
- * Custom hook for creating a share
- */
 export function useCreateShare() {
   const queryClient = useQueryClient();
 
@@ -56,9 +48,6 @@ export function useCreateShare() {
   });
 }
 
-/**
- * Custom hook for updating a share
- */
 export function useUpdateShare() {
   const queryClient = useQueryClient();
 
@@ -76,9 +65,6 @@ export function useUpdateShare() {
   });
 }
 
-/**
- * Custom hook for deleting a share
- */
 export function useDeleteShare() {
   const queryClient = useQueryClient();
 
@@ -95,10 +81,6 @@ export function useDeleteShare() {
   });
 }
 
-/**
- * Custom hook for share management operations
- * Combines all share operations in one hook for convenience
- */
 export function useShareManagement() {
   const sharesQuery = useFetchShares();
   const createShareMutation = useCreateShare();

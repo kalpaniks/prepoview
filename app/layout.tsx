@@ -4,6 +4,8 @@ import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 import QueryProvider from '@/providers/QueryProvider';
+import { getSession } from '@/lib/auth';
+import SessionProvider from '@/providers/SessionProvider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -23,15 +25,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light dark" />
+        <link rel="preconnect" href="https://github.com" />
+        <link rel="preconnect" href="https://avatars.githubusercontent.com" />
+        <link rel="preconnect" href="https://api.github.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://github.com" />
+        <link rel="dns-prefetch" href="https://api.github.com" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider
@@ -41,8 +49,10 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <QueryProvider>
-            {children}
-            <Toaster />
+            <SessionProvider session={session}>
+              {children}
+              <Toaster />
+            </SessionProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

@@ -2,7 +2,7 @@ import { getSession } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { GitHubRepositoryResponse, Repository } from '@/types/share';
 
-async function getUserRepos(accessToken: string): Promise<Repository[]> {
+async function getUserRepos(accessToken: string, userId: string): Promise<Repository[]> {
   try {
     // const response = await fetch(
     //   `https://api.github.com/orgs/devhub-hq/repos?type=all`,
@@ -17,6 +17,10 @@ async function getUserRepos(accessToken: string): Promise<Repository[]> {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
+      },
+      next: {
+        revalidate: 120,
+        tags: [`repos-${userId}`],
       },
     });
     if (!response.ok) {
@@ -63,6 +67,6 @@ export async function GET(): Promise<NextResponse> {
   if (!accessToken) {
     return NextResponse.json({ error: 'No access token' }, { status: 401 });
   }
-  const repos = await getUserRepos(accessToken);
+  const repos = await getUserRepos(accessToken, session.user.id);
   return NextResponse.json(repos);
 }

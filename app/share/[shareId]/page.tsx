@@ -1,4 +1,4 @@
-import EditorViewLayout from '@/components/Editor/EditorViewLayout';
+import EditorViewLayout from '@/components/editor/EditorViewLayout';
 import { Github, Calendar, FileText } from 'lucide-react';
 import { getShareDetails } from '@/lib/share';
 import Link from 'next/link';

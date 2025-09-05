@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LoginWithGitHub } from '@/components/Auth/Login';
+import { LoginWithGitHub } from '@/components/auth/Login';
 
 export default function Home() {
   return (

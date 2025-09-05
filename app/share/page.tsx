@@ -83,7 +83,11 @@ export default function SharePage() {
             onRepositoryShare={openShareDialog}
           />
 
-          <ShareTable shares={shareManagement.shares} repositories={repos ?? []} />
+          <ShareTable
+            shares={shareManagement.shares}
+            repositories={repos ?? []}
+            onDeleteShare={shareManagement.deleteShare}
+          />
         </div>
       </div>
 

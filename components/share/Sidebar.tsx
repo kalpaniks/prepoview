@@ -1,8 +1,3 @@
-/**
- * Sidebar component for the repository sharing dashboard
- * @fileoverview GitHub-style sidebar with user profile and sharing analytics
- */
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Users, Activity, GitBranch, Clock, Settings, Shield } from 'lucide-react';
@@ -11,16 +6,13 @@ import { truncateEmail, isExpiringSoon } from '@/utils/share/helpers';
 import Image from 'next/image';
 
 interface SidebarProps {
-  /** GitHub profile information */
   profile: GitHubProfile;
-  /** Share analytics data */
   analytics?: ShareAnalytics;
 }
 
 function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
   return (
     <div className="space-y-4">
-      {/* Avatar and Basic Info */}
       <div className="flex items-start gap-4">
         <div className="relative">
           <Image
@@ -108,9 +100,6 @@ function AnalyticsSection({ analytics }: { analytics: ShareAnalytics }) {
   );
 }
 
-/**
- * Recent Activity Timeline Component
- */
 function RecentActivitySection({ recentActivity }: { recentActivity: Share[] }) {
   return (
     <div className="space-y-4">
@@ -124,7 +113,6 @@ function RecentActivitySection({ recentActivity }: { recentActivity: Share[] }) 
           </div>
         ) : (
           <div className="relative">
-            {/* Timeline line */}
             <div className="bg-border/50 absolute top-0 bottom-0 left-2 w-px" />
 
             {recentActivity.map((share) => {
@@ -133,7 +121,6 @@ function RecentActivitySection({ recentActivity }: { recentActivity: Share[] }) 
 
               return (
                 <div key={share.id} className="relative flex items-start gap-3 pb-3">
-                  {/* Timeline dot */}
                   <div
                     className={`border-background relative z-10 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
                       isExpired
@@ -184,9 +171,6 @@ function RecentActivitySection({ recentActivity }: { recentActivity: Share[] }) 
   );
 }
 
-/**
- * Quick Actions Section Component
- */
 function QuickActionsSection() {
   return (
     <div className="border-border/50 bg-card/30 sticky bottom-0 mt-auto border-t px-6 pt-4 pb-4">
@@ -204,10 +188,6 @@ function QuickActionsSection() {
   );
 }
 
-/**
- * Main Sidebar Component
- * Displays user profile, sharing analytics, and recent activity
- */
 export default function Sidebar({
   profile,
   analytics = {
@@ -221,20 +201,11 @@ export default function Sidebar({
   return (
     <div className="border-border/60 bg-card/30 w-72 overflow-y-auto border-r">
       <div className="flex h-full flex-col space-y-6 p-6">
-        {/* GitHub Profile Section */}
         <GitHubProfileSection profile={profile} />
-
         <div className="border-border/50 border-t" />
-
-        {/* Sharing Analytics */}
         <AnalyticsSection analytics={analytics} />
-
         <div className="border-border/50 border-t" />
-
-        {/* Recent Activity Timeline */}
         <RecentActivitySection recentActivity={analytics.recentActivity} />
-
-        {/* Quick Actions */}
         <QuickActionsSection />
       </div>
     </div>
