@@ -90,6 +90,7 @@ export function useShareManagement() {
   return {
     shares: sharesQuery.data || [],
     isLoading: sharesQuery.isLoading,
+    isFetching: sharesQuery.isFetching,
     error: sharesQuery.error,
     createShare: createShareMutation.mutate,
     updateShare: updateShareMutation.mutate,

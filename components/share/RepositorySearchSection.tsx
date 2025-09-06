@@ -14,6 +14,7 @@ import {
 import { Search, Filter, ChevronDown, Clock, ArrowUpDown, FileText, GitBranch } from 'lucide-react';
 import type { Repository } from '@/types/share';
 import RepositorySearchResult from './RepositorySearchResult';
+import { Skeleton } from '../ui/skeleton';
 
 interface RepositorySearchSectionProps {
   isLoading: boolean;
@@ -28,6 +29,7 @@ interface RepositorySearchSectionProps {
   hasSearchQuery: boolean;
   filteredRepositories: Repository[];
   onRepositoryShare: (repository: Repository) => void;
+  isFetching: boolean;
 }
 
 function SearchEmptyState() {
@@ -132,14 +134,30 @@ function SearchResults({
   filteredRepositories,
   languageFilter,
   onRepositoryShare,
+  isLoading,
+  isFetching,
 }: {
   hasSearchQuery: boolean;
   filteredRepositories: Repository[];
   languageFilter: string;
   onRepositoryShare: (repository: Repository) => void;
+  isLoading: boolean;
+  isFetching: boolean;
 }) {
   if (!hasSearchQuery) {
     return <SearchEmptyState />;
+  }
+
+  if (hasSearchQuery && (isLoading || isFetching)) {
+    return (
+      <div className="text-muted-foreground flex items-center gap-2 text-xs">
+        <span
+          className="bg-muted/70 inline-block h-3 w-3 animate-pulse rounded-full"
+          aria-live="polite"
+        />
+        Searching repositories…
+      </div>
+    );
   }
 
   if (filteredRepositories.length === 0) {
@@ -176,6 +194,8 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
     hasSearchQuery,
     filteredRepositories,
     onRepositoryShare,
+    isLoading,
+    isFetching,
   } = props;
 
   return (
@@ -212,6 +232,8 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
           filteredRepositories={filteredRepositories}
           languageFilter={languageFilter}
           onRepositoryShare={onRepositoryShare}
+          isLoading={isLoading}
+          isFetching={isFetching}
         />
       </CardContent>
     </Card>

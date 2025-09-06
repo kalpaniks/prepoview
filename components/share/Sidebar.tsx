@@ -4,29 +4,53 @@ import { Users, Activity, GitBranch, Clock, Settings, Shield } from 'lucide-reac
 import type { GitHubProfile, ShareAnalytics, Share } from '@/types/share';
 import { truncateEmail, isExpiringSoon } from '@/utils/share/helpers';
 import Image from 'next/image';
+import { Skeleton } from '../ui/skeleton';
 
 interface SidebarProps {
   profile: GitHubProfile;
   analytics?: ShareAnalytics;
+  isLoading: boolean;
+  isFetching: boolean;
 }
 
-function GitHubProfileSection({ profile }: { profile: GitHubProfile }) {
+function GitHubProfileSection({
+  profile,
+  isLoading,
+  isFetching,
+}: {
+  profile: GitHubProfile;
+  isLoading: boolean;
+  isFetching: boolean;
+}) {
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-4">
         <div className="relative">
-          <Image
-            src={profile?.avatar_url || ''}
-            alt={profile?.name || 'avatar'}
-            width={48}
-            height={48}
-            className="ring-border/50 h-14 w-14 rounded-full object-cover ring-2"
-          />
+          {isLoading && isFetching ? (
+            <Skeleton className="h-14 w-14 rounded-full" />
+          ) : (
+            <Image
+              src={profile?.avatar_url || ''}
+              alt={profile?.name || 'avatar'}
+              width={48}
+              height={48}
+              className="ring-border/50 h-14 w-14 rounded-full object-cover ring-2"
+            />
+          )}
         </div>
 
         <div className="my-auto min-w-0">
-          <h2 className="text-base leading-tight font-semibold">{profile?.name}</h2>
-          <p className="text-muted-foreground font-mono text-xs">@{profile?.login}</p>
+          {isLoading || isFetching ? (
+            <>
+              <Skeleton className="mb-1 h-4 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </>
+          ) : (
+            <>
+              <h2 className="text-base leading-tight font-semibold">{profile?.name}</h2>
+              <p className="text-muted-foreground font-mono text-xs">@{profile?.login}</p>
+            </>
+          )}
           {/* <div className="mt-2 flex items-center gap-2">
             <Badge variant="outline" className="text-xs font-medium">
               GitHub {profile?.plan?.name}
@@ -197,11 +221,13 @@ export default function Sidebar({
     thisWeekShares: 0,
     recentActivity: [],
   },
+  isLoading,
+  isFetching,
 }: SidebarProps) {
   return (
     <div className="border-border/60 bg-card/30 w-72 overflow-y-auto border-r">
       <div className="flex h-full flex-col space-y-6 p-6">
-        <GitHubProfileSection profile={profile} />
+        <GitHubProfileSection profile={profile} isLoading={isLoading} isFetching={isFetching} />
         <div className="border-border/50 border-t" />
         <AnalyticsSection analytics={analytics} />
         <div className="border-border/50 border-t" />

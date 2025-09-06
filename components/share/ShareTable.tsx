@@ -20,11 +20,14 @@ import {
 } from '@/utils/share/helpers';
 import { toast } from 'sonner';
 import { useCallback } from 'react';
+import { Skeleton } from '../ui/skeleton';
 
 interface ShareTableProps {
   shares: Share[];
   repositories: Repository[];
   onDeleteShare: (id: number) => void;
+  isLoading: boolean;
+  isFetching: boolean;
 }
 
 function EmptyState() {
@@ -119,7 +122,13 @@ function RepositoryInfo({
   );
 }
 
-export default function ShareTable({ shares, repositories, onDeleteShare }: ShareTableProps) {
+export default function ShareTable({
+  shares,
+  repositories,
+  onDeleteShare,
+  isLoading,
+  isFetching,
+}: ShareTableProps) {
   const handleCopyShareLink = useCallback((shareLink: string) => {
     try {
       navigator.clipboard.writeText(shareLink);
@@ -172,6 +181,9 @@ export default function ShareTable({ shares, repositories, onDeleteShare }: Shar
         </div>
       </CardHeader>
       <CardContent>
+        {isFetching && !isLoading ? (
+          <div className="bg-primary/60 absolute inset-x-0 top-0 h-px animate-pulse" aria-hidden />
+        ) : null}
         <div className="border-border/60 rounded-sm border px-4 sm:px-6">
           <Table>
             <TableHeader className="px-6">
@@ -185,36 +197,51 @@ export default function ShareTable({ shares, repositories, onDeleteShare }: Shar
               </TableRow>
             </TableHeader>
             <TableBody className="px-6">
-              {shares.map((share) => (
-                <TableRow key={share.id} className="group">
-                  <TableCell>
-                    <RepositoryInfo repositoryName={share.repoName} repositories={repositories} />
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-mono text-sm">{share.sharedWith}</div>
-                  </TableCell>
-                  <TableCell>
-                    <UsageProgress share={share} />
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getShareStatusVariant(share)} className="text-xs">
-                      {share.status === 'expired'
-                        ? 'Expired'
-                        : getTimeUntilExpiration(share.expiresAt)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {new Date(share.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <ShareActions
-                      share={share}
-                      onCopyLink={handleCopyShareLink}
-                      onDeleteShare={handleDeleteShare}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+              {isLoading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <TableRow key={i} className="hover:bg-transparent">
+                      <TableCell colSpan={6}>
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="h-4 w-40" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-3 w-28" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : shares.map((share) => (
+                    <TableRow key={share.id} className="group">
+                      <TableCell>
+                        <RepositoryInfo
+                          repositoryName={share.repoName}
+                          repositories={repositories}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-mono text-sm">{share.sharedWith}</div>
+                      </TableCell>
+                      <TableCell>
+                        <UsageProgress share={share} />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getShareStatusVariant(share)} className="text-xs">
+                          {share.status === 'expired'
+                            ? 'Expired'
+                            : getTimeUntilExpiration(share.expiresAt)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(share.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <ShareActions
+                          share={share}
+                          onCopyLink={handleCopyShareLink}
+                          onDeleteShare={handleDeleteShare}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </div>

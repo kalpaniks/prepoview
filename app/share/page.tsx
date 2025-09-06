@@ -36,11 +36,20 @@ function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
 export default function SharePage() {
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const { data: repos, isLoading: isReposLoading, isError: isReposError } = useReposQuery();
+  const {
+    data: repos,
+    isLoading: isReposLoading,
+    isFetching: isReposFetching,
+    isError: isReposError,
+  } = useReposQuery();
   const shareManagement = useShareManagement();
   const repositorySearch = useRepositorySearch(repos ?? []);
 
-  const { data: githubProfile } = useGithubProfileQuery();
+  const {
+    data: githubProfile,
+    isLoading: isGithubProfileLoading,
+    isFetching: isGithubProfileFetching,
+  } = useGithubProfileQuery();
 
   const analytics = useShareAnalytics(shareManagement.shares);
 
@@ -62,7 +71,12 @@ export default function SharePage() {
 
   return (
     <div className="bg-background flex h-screen">
-      <Sidebar profile={githubProfile} analytics={analytics} />
+      <Sidebar
+        profile={githubProfile}
+        analytics={analytics}
+        isLoading={isGithubProfileLoading}
+        isFetching={isGithubProfileFetching}
+      />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader onRevokeAll={handleRevokeAllShares} />
@@ -70,6 +84,7 @@ export default function SharePage() {
         <div className="flex-1 space-y-6 overflow-auto p-6">
           <RepositorySearchSection
             isLoading={isReposLoading}
+            isFetching={isReposFetching}
             isError={isReposError}
             searchQuery={repositorySearch.searchQuery}
             onSearchChange={repositorySearch.setSearchQuery}
@@ -87,6 +102,8 @@ export default function SharePage() {
             shares={shareManagement.shares}
             repositories={repos ?? []}
             onDeleteShare={shareManagement.deleteShare}
+            isLoading={shareManagement.isLoading}
+            isFetching={shareManagement.isFetching}
           />
         </div>
       </div>
