@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CreateShareRequest, Share } from '@/types/share';
 import {
   createShare,
@@ -15,7 +15,8 @@ export function useFetchShares() {
   return useQuery({
     queryKey: queryKeys.shares,
     queryFn: fetchUserShares,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -24,6 +25,7 @@ export function useFetchShare(id: string) {
     queryKey: queryKeys.share(id),
     queryFn: () => fetchShare(id),
     enabled: !!id,
+    placeholderData: keepPreviousData,
   });
 }
 
