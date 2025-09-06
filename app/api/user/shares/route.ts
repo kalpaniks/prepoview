@@ -8,6 +8,22 @@ async function getUserShares(userId: string) {
       where: {
         userId: userId,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 50,
+      select: {
+        id: true,
+        repoOwner: true,
+        repoName: true,
+        viewLimit: true,
+        viewCount: true,
+        sharedWith: true,
+        expiresAt: true,
+        createdAt: true,
+        isExpired: true,
+        isActive: true,
+      },
     });
     return shares;
   } catch (error) {
