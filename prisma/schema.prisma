@@ -56,6 +56,8 @@ model Share{
     createdAt DateTime @default(now())
     user User   @relation(fields: [userId], references: [id])
     ViewerSession ViewerSession[]
+
+    @@index([userId, createdAt])
 }
 
 model ViewerSession {
