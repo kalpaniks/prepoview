@@ -14,7 +14,7 @@ import {
 import { GitBranch } from 'lucide-react';
 import type { Repository } from '@/types/share';
 import { DEFAULT_SHARE_CONFIG } from '@/utils/share/constants';
-import { useCreateShare } from '@/hooks/useShareManagement';
+import { useCreateShare } from '@/hooks/use-share-management';
 
 interface ShareDialogProps {
   repository: Repository | null;

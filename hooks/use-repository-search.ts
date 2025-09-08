@@ -49,12 +49,15 @@ export function useRepositorySearch(repositories: Repository[]) {
   };
 
   return {
+    // State
     searchQuery,
     sortBy,
     languageFilter,
     hasSearchQuery,
+    // Computed
     filteredRepositories: filteredAndSortedRepositories,
     availableLanguages,
+    // Actions
     setSearchQuery,
     setSortBy,
     setLanguageFilter,

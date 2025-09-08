@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Shield } from 'lucide-react';
 import { toast } from 'sonner';
-import { useRepositorySearch } from '@/hooks/useRepositorySearch';
-import { useShareManagement } from '@/hooks/useShareManagement';
+import { useRepositorySearch } from '@/hooks/use-repository-search';
+import { useShareManagement } from '@/hooks/use-share-management';
 import { Sidebar, RepositorySearchSection, ShareDialog, ShareTable } from '@/components/share';
 import type { Repository } from '@/types/share';
 import { useGithubProfileQuery, useReposQuery } from '@/hooks/queries';
-import { useShareAnalytics } from '@/hooks/useShareAnalytics';
+import { useShareAnalytics } from '@/hooks/use-share-analytics';
 
 function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
   return (

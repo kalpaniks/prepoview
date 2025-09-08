@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { TIME_CONSTANTS } from '@/utils/share/constants';
 import type { Share as UiShare, ShareAnalytics } from '@/types/share';
 
-// Accepts raw shares from API (shape may vary) and returns UI analytics
+// Accepts raw shares from API
 export function useShareAnalytics(shares: any[]): ShareAnalytics {
   return useMemo(() => {
     if (!Array.isArray(shares) || shares.length === 0) {

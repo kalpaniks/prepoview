@@ -90,10 +90,13 @@ export function useShareManagement() {
   const deleteShareMutation = useDeleteShare();
 
   return {
+    // State
     shares: sharesQuery.data || [],
+    // Computed
     isLoading: sharesQuery.isLoading,
     isFetching: sharesQuery.isFetching,
     error: sharesQuery.error,
+    // Actions
     createShare: createShareMutation.mutate,
     updateShare: updateShareMutation.mutate,
     deleteShare: deleteShareMutation.mutate,
