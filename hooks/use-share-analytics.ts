@@ -36,7 +36,8 @@ export function useShareAnalytics(shares: any[]): ShareAnalytics {
       const status: UiShare['status'] = expired || overLimit || s.isExpired ? 'expired' : 'active';
 
       return {
-        id: (s.id as number) ?? Number.NaN, // used only as key in some places
+        id: (s.id as string) ?? '', // used only as key in some places
+        userId: (s.userId as string) ?? '',
         repoName: (s.repoName as string) ?? 'unknown',
         sharedWith: (s.sharedWith as string) ?? 'unknown',
         expiresAt: (expiresAt as any) ?? (null as any),
