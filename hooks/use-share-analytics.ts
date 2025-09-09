@@ -33,7 +33,7 @@ export function useShareAnalytics(shares: any[]): ShareAnalytics {
 
       const expired = !!(expiresAt && expiresAt.getTime() <= now);
       const overLimit = typeof viewLimit === 'number' && viewLimit > 0 && viewCount >= viewLimit;
-      const status: UiShare['status'] = expired || overLimit || s.isExpired ? 'expired' : 'active';
+      const status: UiShare['status'] = expired || overLimit ? 'expired' : 'active';
 
       return {
         id: (s.id as string) ?? '', // used only as key in some places

@@ -21,8 +21,6 @@ async function getUserShares(userId: string) {
         sharedWith: true,
         expiresAt: true,
         createdAt: true,
-        isExpired: true,
-        isActive: true,
       },
     });
     return shares;

@@ -10,9 +10,9 @@ export async function getShareDetails(shareID: string) {
       repoOwner: true,
       userId: true,
       createdAt: true,
-      isExpired: true,
       viewLimit: true,
       viewCount: true,
+      expiresAt: true,
     },
   });
   if (!share) {
@@ -27,7 +27,7 @@ export async function createViewSession(shareId: string, ttlMin = 30): Promise<V
   if (!share) {
     throw new Error('Share not found');
   }
-  if (share.isExpired || !share.isActive || (share.expiresAt && share.expiresAt <= now)) {
+  if (share.expiresAt && share.expiresAt <= now) {
     throw new Error('Share is expired');
   }
   if (share.viewLimit && share.viewCount >= share.viewLimit) {
@@ -55,7 +55,7 @@ export async function requireValidViewSession(shareId: string, sessionId?: strin
   if (!share) {
     throw new Error('Share not found');
   }
-  if (share.isExpired || !share.isActive || (share.expiresAt && share.expiresAt <= now)) {
+  if (share.expiresAt && share.expiresAt <= now) {
     throw new Error('Share is expired');
   }
   if (share.viewLimit && share.viewCount >= share.viewLimit) {
