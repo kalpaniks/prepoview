@@ -12,6 +12,7 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "husky install",
     "postinstall": "prisma generate"
   },

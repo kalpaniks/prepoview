@@ -4,7 +4,6 @@ import { getTree } from '@/lib/github';
 import { getDecryptedTokensForUser } from '@/lib/adapter';
 import prisma from '@/lib/prisma';
 
-
 type GitHubGitTreeItem = {
   path: string;
   type: 'blob' | 'tree';
@@ -81,7 +80,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
     return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
   }
 
-   try {
+  try {
     const share = await getShareDetails(shareId);
     if (share.expiresAt && share.expiresAt < new Date()) {
       return NextResponse.json({ error: 'Share is expired' }, { status: 403 });
@@ -100,8 +99,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
       getTree(share.repoName, share.repoOwner, tokens.access_token as string)
     );
 
-    const treeItems = Array.isArray((treeResponse as any)?.tree)
-      ? ((treeResponse as any).tree as GitHubGitTreeItem[])
+    const treeItems = Array.isArray(treeResponse?.tree)
+      ? (treeResponse.tree as GitHubGitTreeItem[])
       : [];
 
     const immediateChildren = getImmediateChildrenForPath(
