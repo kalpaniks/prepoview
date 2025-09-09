@@ -1,48 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getShareDetails, requireValidViewSession } from '@/lib/share';
-import { getBaseTree } from '@/lib/github';
+import { getTree } from '@/lib/github';
 import { getDecryptedTokensForUser } from '@/lib/adapter';
 import prisma from '@/lib/prisma';
 
-interface GitHubTreeItem {
-  name: string;
+
+type GitHubGitTreeItem = {
   path: string;
-  type: 'file' | 'dir';
+  type: 'blob' | 'tree';
   sha: string;
-  size?: number;
-  download_url?: string;
+};
+
+type TreeCacheEntry = {
+  data: { tree: GitHubGitTreeItem[] };
+  expiresAt: number;
+  inflight?: Promise<{ tree: GitHubGitTreeItem[] }>;
+};
+
+const treeCache = new Map<string, TreeCacheEntry>();
+const TREE_CACHE_TTL_MS = 60_000;
+
+function makeTreeCacheKey(shareId: string): string {
+  return `tree:${shareId}`;
 }
 
-async function fetchDirectoryContents(
-  repoName: string,
-  repoOwner: string,
-  accessToken: string,
-  directoryPath: string
-): Promise<GitHubTreeItem[]> {
-  const encodedPath = encodeURIComponent(directoryPath);
-  const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${encodedPath}`;
+async function getCachedTreeForShare(
+  shareId: string,
+  fetcher: () => Promise<{ tree: GitHubGitTreeItem[] }>
+): Promise<{ tree: GitHubGitTreeItem[] }> {
+  const key = makeTreeCacheKey(shareId);
+  const now = Date.now();
+  const existing = treeCache.get(key);
 
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'application/vnd.github.v3+json',
-    },
+  if (existing && existing.data && existing.expiresAt > now) {
+    return existing.data;
+  }
+
+  if (existing?.inflight) {
+    return existing.inflight;
+  }
+
+  const inflight = fetcher()
+    .then((data) => {
+      treeCache.set(key, { data, expiresAt: Date.now() + TREE_CACHE_TTL_MS });
+      return data;
+    })
+    .finally(() => {
+      const latest = treeCache.get(key);
+      if (latest) {
+        delete latest.inflight;
+        treeCache.set(key, latest);
+      }
+    });
+
+  treeCache.set(key, { data: { tree: [] }, expiresAt: 0, inflight });
+  return inflight;
+}
+
+function getImmediateChildrenForPath(
+  tree: GitHubGitTreeItem[],
+  parentPath: string | null
+): GitHubGitTreeItem[] {
+  const prefix = parentPath ? parentPath.replace(/\/+$/, '') + '/' : '';
+  const children = tree.filter((item) => {
+    if (!prefix) {
+      return !item.path.includes('/');
+    }
+    if (!item.path.startsWith(prefix)) return false;
+    const rest = item.path.slice(prefix.length);
+    return rest.length > 0 && !rest.includes('/');
   });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      `GitHub API error: ${response.status} - ${errorData.message || response.statusText}`
-    );
-  }
-
-  const data = await response.json();
-
-  if (!Array.isArray(data)) {
-    throw new Error('Expected directory contents to be an array');
-  }
-
-  return data as GitHubTreeItem[];
+  return children;
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ shareId: string }> }) {
@@ -52,49 +80,43 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
   if (!shareId) {
     return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
   }
-  // const sessionId = req.cookies.get('viewer_session')?.value;
-  // try {
-  //   await requireValidViewSession(shareId, sessionId);
-  // } catch {
-  //   const response = NextResponse.json({ error: 'Access Denied' }, { status: 403 });
-  //   response.cookies.delete('viewer_session');
-  //   return response;
-  // }
 
-  try {
+   try {
     const share = await getShareDetails(shareId);
-    const accessToken = await getDecryptedTokensForUser(prisma, share.userId, 'github');
+    if (share.isExpired) {
+      return NextResponse.json({ error: 'Share is expired' }, { status: 403 });
+    }
+    if (share.viewLimit && share.viewCount >= share.viewLimit) {
+      return NextResponse.json({ error: 'Share view limit reached' }, { status: 403 });
+    }
 
-    if (!accessToken?.access_token) {
+    const tokens = await getDecryptedTokensForUser(prisma, share.userId, 'github');
+
+    if (!tokens?.access_token) {
       return NextResponse.json({ error: 'Access token not found' }, { status: 401 });
     }
 
-    let githubTreeResponse: GitHubTreeItem[];
+    const treeResponse = await getCachedTreeForShare(shareId, () =>
+      getTree(share.repoName, share.repoOwner, tokens.access_token as string)
+    );
 
-    if (directoryPath) {
-      githubTreeResponse = await fetchDirectoryContents(
-        share.repoName,
-        share.repoOwner,
-        accessToken.access_token,
-        directoryPath
-      );
-    } else {
-      githubTreeResponse = await getBaseTree(
-        share.repoName,
-        share.repoOwner,
-        accessToken.access_token
-      );
-    }
+    const treeItems = Array.isArray((treeResponse as any)?.tree)
+      ? ((treeResponse as any).tree as GitHubGitTreeItem[])
+      : [];
 
-    const transformedData = githubTreeResponse.map((item: GitHubTreeItem) => ({
-      name: item.name,
+    const immediateChildren = getImmediateChildrenForPath(
+      treeItems,
+      directoryPath && directoryPath !== '/' ? directoryPath : null
+    );
+
+    const transformedData = immediateChildren.map((item) => ({
+      name: item.path.split('/').pop() as string,
       path: item.path,
-      type: item.type === 'file' ? 'file' : 'dir',
+      type: item.type === 'blob' ? 'file' : 'dir',
       sha: item.sha,
     }));
 
-    const response = NextResponse.json(transformedData);
-    return response;
+    return NextResponse.json(transformedData);
   } catch (error) {
     console.error('Error fetching repository tree:', error);
     return NextResponse.json(

@@ -49,8 +49,6 @@ model Share{
     repoName String
     viewLimit Int?
     viewCount Int @default(0)
-    isActive Boolean @default(true)
-    isExpired Boolean @default(false)
     sharedWith String?
     expiresAt DateTime?
     createdAt DateTime @default(now())

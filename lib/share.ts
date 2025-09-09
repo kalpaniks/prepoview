@@ -10,6 +10,9 @@ export async function getShareDetails(shareID: string) {
       repoOwner: true,
       userId: true,
       createdAt: true,
+      isExpired: true,
+      viewLimit: true,
+      viewCount: true,
     },
   });
   if (!share) {
