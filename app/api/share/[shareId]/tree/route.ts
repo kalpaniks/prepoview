@@ -52,14 +52,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
   if (!shareId) {
     return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
   }
-  const sessionId = req.cookies.get('viewer_session')?.value;
-  try {
-    await requireValidViewSession(shareId, sessionId);
-  } catch {
-    const response = NextResponse.json({ error: 'Access Denied' }, { status: 403 });
-    response.cookies.delete('viewer_session');
-    return response;
-  }
+  // const sessionId = req.cookies.get('viewer_session')?.value;
+  // try {
+  //   await requireValidViewSession(shareId, sessionId);
+  // } catch {
+  //   const response = NextResponse.json({ error: 'Access Denied' }, { status: 403 });
+  //   response.cookies.delete('viewer_session');
+  //   return response;
+  // }
 
   try {
     const share = await getShareDetails(shareId);

@@ -73,12 +73,15 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
   return NextResponse.json(share);
 }
 
-export async function DELETE(request: NextRequest): Promise<NextResponse> {
+export async function DELETE(req: NextRequest) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const { id } = await request.json();
-  await prisma.share.delete({ where: { id, userId: session.user.id } });
+  const shareId = req.nextUrl.searchParams.get('shareId');
+  if (!shareId) {
+    return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
+  }
+  await prisma.share.delete({ where: { id: shareId, userId: session.user.id } });
   return NextResponse.json({ message: 'Share deleted' });
 }

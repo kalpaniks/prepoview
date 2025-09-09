@@ -25,7 +25,7 @@ import { Skeleton } from '../ui/skeleton';
 interface ShareTableProps {
   shares: Share[];
   repositories: Repository[];
-  onDeleteShare: (id: number) => void;
+  onDeleteShare: (id: string) => void;
   isLoading: boolean;
   isFetching: boolean;
 }
@@ -49,7 +49,7 @@ function ShareActions({
 }: {
   share: Share;
   onCopyLink: (link: string) => void;
-  onDeleteShare: (id: number) => void;
+  onDeleteShare: (id: string) => void;
 }) {
   return (
     <div className="flex translate-x-2 items-center justify-end gap-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
@@ -139,7 +139,7 @@ export default function ShareTable({
   }, []);
 
   const handleDeleteShare = useCallback(
-    (shareId: number) => {
+    (shareId: string) => {
       onDeleteShare(shareId);
       toast.success('Share revoked', { description: 'Repository access has been revoked' });
     },

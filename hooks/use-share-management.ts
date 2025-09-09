@@ -71,7 +71,7 @@ export function useDeleteShare() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => deleteShare(id),
+    mutationFn: (id: string) => deleteShare(id),
     onSuccess: (_, deletedId) => {
       queryClient.invalidateQueries({ queryKey: ['shares'] });
       queryClient.removeQueries({ queryKey: ['share', deletedId.toString()] });

@@ -47,8 +47,8 @@ export async function updateShare(id: string, updates: Partial<Share>) {
   return data as Share;
 }
 
-export async function deleteShare(id: number) {
-  const response = await fetch(`/api/share/${id}`, {
+export async function deleteShare(shareId: string) {
+  const response = await fetch(`/api/share?shareId=${shareId}`, {
     method: 'DELETE',
     credentials: 'include',
   });
