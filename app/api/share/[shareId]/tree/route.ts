@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShareDetails, requireValidViewSession } from '@/lib/share';
+import { getShareDetails } from '@/lib/share';
 import { getTree } from '@/lib/github';
 import { getDecryptedTokensForUser } from '@/lib/adapter';
 import prisma from '@/lib/prisma';
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
 
    try {
     const share = await getShareDetails(shareId);
-    if (share.isExpired) {
+    if (share.expiresAt && share.expiresAt < new Date()) {
       return NextResponse.json({ error: 'Share is expired' }, { status: 403 });
     }
     if (share.viewLimit && share.viewCount >= share.viewLimit) {
