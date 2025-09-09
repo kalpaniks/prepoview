@@ -94,7 +94,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
     }));
 
     const response = NextResponse.json(transformedData);
-    response.headers.set('Cache-Control', 'no-store');
     return response;
   } catch (error) {
     console.error('Error fetching repository tree:', error);

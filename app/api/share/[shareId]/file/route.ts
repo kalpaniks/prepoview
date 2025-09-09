@@ -29,5 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
     tokens.access_token,
     filePath
   );
-  return NextResponse.json(file);
+  const response = NextResponse.json(file);
+  response.headers.set('Cache-Control', 'no-store');
+  return response;
 }

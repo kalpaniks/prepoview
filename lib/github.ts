@@ -2,6 +2,7 @@ export async function getTree(repoName: string, repoOwner: string, accessToken: 
   const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/vnd.github.v3+json',
     },
   });
 
@@ -18,6 +19,7 @@ export async function getTree(repoName: string, repoOwner: string, accessToken: 
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/vnd.github.v3+json',
       },
     }
   );
@@ -41,6 +43,7 @@ export async function getFile(
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/vnd.github.v3+json',
       },
     }
   );
@@ -51,6 +54,7 @@ export async function getBaseTree(repoName: string, repoOwner: string, accessTok
   const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/vnd.github.v3+json',
     },
   });
   const data = await response.json();

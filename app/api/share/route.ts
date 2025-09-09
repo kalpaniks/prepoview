@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { updateShare } from '@/lib/api/share';
+import { Share } from '@prisma/client';
 
-interface ShareRequest {
+interface CreateShareRequest {
   userId: string;
   repoName: string;
   repoOwner: string;
@@ -12,7 +12,7 @@ interface ShareRequest {
   sharedWith?: string;
 }
 
-async function createShare(shareRequest: ShareRequest): Promise<string> {
+async function createShare(shareRequest: CreateShareRequest): Promise<string> {
   try {
     const share = await prisma.share.create({
       data: {
@@ -34,6 +34,11 @@ async function createShare(shareRequest: ShareRequest): Promise<string> {
     console.error('Error creating share:', error);
     throw new Error('Failed to create share');
   }
+}
+
+async function updateShare(id: string, updates: Partial<Share>): Promise<Share> {
+  const share = await prisma.share.update({ where: { id }, data: updates });
+  return share;
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -63,7 +68,17 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const { id } = await request.json();
-  const share = await updateShare(id, { expiresAt: new Date() });
+  const { id, expiresAt, viewLimit } = await request.json();
+  const share = await updateShare(id, { expiresAt, viewLimit });
   return NextResponse.json(share);
+}
+
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const { id } = await request.json();
+  await prisma.share.delete({ where: { id, userId: session.user.id } });
+  return NextResponse.json({ message: 'Share deleted' });
 }

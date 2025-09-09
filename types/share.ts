@@ -53,13 +53,13 @@ export interface GitHubRepositoryResponse {
  * Represents a repository share with access controls
  */
 export interface Share {
-  id: number;
+  id: string;
+  userId: string;
   repoName: string;
   sharedWith: string;
   expiresAt: Date;
   viewLimit: number;
   viewCount: number;
-  shareLink: string;
   createdAt: Date;
   status: 'active' | 'expired' | 'revoked';
 }
