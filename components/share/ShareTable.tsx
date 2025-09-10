@@ -19,8 +19,9 @@ import {
   // formatDate,
 } from '@/utils/share/helpers';
 import { toast } from 'sonner';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
+import ShareDialog from './ShareDialog';
 
 interface ShareTableProps {
   shares: Share[];
@@ -46,10 +47,12 @@ function ShareActions({
   share,
   onCopyLink,
   onDeleteShare,
+  onEditShare,
 }: {
   share: Share;
   onCopyLink: (link: string) => void;
   onDeleteShare: (id: string) => void;
+  onEditShare: (share: Share) => void;
 }) {
   return (
     <div className="flex translate-x-2 items-center justify-end gap-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
@@ -70,6 +73,15 @@ function ShareActions({
         title="Open share link"
       >
         <ExternalLink className="h-3 w-3" />
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => onEditShare(share)}
+        className="h-8 w-8 p-0"
+        title="Edit share"
+      >
+        Edit
       </Button>
       <Button
         size="sm"
@@ -129,6 +141,9 @@ export default function ShareTable({
   isLoading,
   isFetching,
 }: ShareTableProps) {
+  const [editingShare, setEditingShare] = useState<Share | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   const handleCopyShareLink = useCallback((shareLink: string) => {
     try {
       navigator.clipboard.writeText(shareLink);
@@ -141,10 +156,14 @@ export default function ShareTable({
   const handleDeleteShare = useCallback(
     (shareId: string) => {
       onDeleteShare(shareId);
-      toast.success('Share revoked', { description: 'Repository access has been revoked' });
     },
     [onDeleteShare]
   );
+
+  const handleEditShare = useCallback((share: Share) => {
+    setEditingShare(share);
+    setIsEditOpen(true);
+  }, []);
 
   if (shares.length === 0) {
     return (
@@ -238,6 +257,7 @@ export default function ShareTable({
                           share={share}
                           onCopyLink={handleCopyShareLink}
                           onDeleteShare={handleDeleteShare}
+                          onEditShare={handleEditShare}
                         />
                       </TableCell>
                     </TableRow>
@@ -246,6 +266,11 @@ export default function ShareTable({
           </Table>
         </div>
       </CardContent>
+      <ShareDialog
+        editingShare={editingShare}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+      />
     </Card>
   );
 }

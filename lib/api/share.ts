@@ -15,7 +15,7 @@ export async function fetchUserShares() {
   })) as Share[];
 }
 
-export async function createShare(share: CreateShareRequest) {
+export async function createShare(share: CreateShareRequest): Promise<string> {
   const response = await fetch(`/api/share`, {
     method: 'POST',
     headers: {
@@ -28,16 +28,17 @@ export async function createShare(share: CreateShareRequest) {
     throw new Error('Failed to create share');
   }
   const data = await response.json();
-  return data as Share;
+  return data.shareId as string;
 }
 
 export async function updateShare(id: string, updates: Partial<Share>) {
-  const response = await fetch(`/api/share/${id}`, {
+  const { expiresAt, viewLimit } = updates;
+  const response = await fetch(`/api/share`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(updates),
+    body: JSON.stringify({ id, expiresAt, viewLimit }),
     credentials: 'include',
   });
   if (!response.ok) {

@@ -22,9 +22,9 @@ export function validateShareRequest(data: CreateShareRequest): {
   }
 
   if (!data.sharedWith?.trim()) {
-    errors.push('Email address is required');
-  } else if (!isValidEmail(data.sharedWith)) {
-    errors.push('Invalid email address');
+    errors.push('Recipient name is required');
+  } else if (!isValidNameOrEmail(data.sharedWith)) {
+    errors.push('Invalid recipient name or email');
   }
 
   if (data.expirationDays < 1 || data.expirationDays > 365) {
@@ -57,33 +57,21 @@ export function formatShareForDisplay(share: Share): FormattedShare {
   };
 }
 
-/**
- * Calculates expiry date based on days
- */
 export function calculateShareExpiry(expirationDays: number): Date {
   const expiryDate = new Date();
   expiryDate.setDate(expiryDate.getDate() + expirationDays);
   return expiryDate;
 }
 
-/**
- * Generates a share link
- */
 export function generateShareLink(shareId: string): string {
   return `${window.location.origin}/share/${shareId}`;
 }
 
-/**
- * Validates email format
- */
-function isValidEmail(email: string): boolean {
+function isValidNameOrEmail(nameOrEmail: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  return emailRegex.test(nameOrEmail);
 }
 
-/**
- * Checks if a share is active
- */
 export function isShareActive(share: Share): boolean {
   const now = new Date();
   const expiryDate = new Date(share.expiresAt);

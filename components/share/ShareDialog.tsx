@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,12 +12,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { GitBranch } from 'lucide-react';
-import type { Repository } from '@/types/share';
+import type { Repository, Share } from '@/types/share';
 import { DEFAULT_SHARE_CONFIG } from '@/utils/share/constants';
-import { useCreateShare } from '@/hooks/use-share-management';
+import { useCreateShare, useUpdateShare } from '@/hooks/use-share-management';
 
 interface ShareDialogProps {
-  repository: Repository | null;
+  repository?: Repository | null; // create mode when provided
+  editingShare?: Share | null; // update mode when provided
   isOpen: boolean;
   onClose: () => void;
 }
@@ -32,100 +33,123 @@ function RepositoryPreview({ repository }: { repository: Repository }) {
           {repository.language}
         </Badge>
       </div>
-      <p className="text-muted-foreground mt-1 text-xs">{repository.description}</p>
+      {repository.description && (
+        <p className="text-muted-foreground mt-1 text-xs">{repository.description}</p>
+      )}
     </div>
   );
 }
 
-type CreateSharePayload = {
-  repoOwner: string;
-  repoName: string;
-  expiresAt: Date;
-  viewLimit: number;
-  sharedWith: string;
-};
+export default function ShareDialog({
+  repository = null,
+  editingShare = null,
+  isOpen,
+  onClose,
+}: ShareDialogProps) {
+  const isEditMode = !!editingShare;
+  const createMutation = useCreateShare();
+  const updateMutation = useUpdateShare();
 
-export default function ShareDialog({ repository, isOpen, onClose }: ShareDialogProps) {
-  const [shareEmail, setShareEmail] = useState('');
+  const [recipientName, setRecipientName] = useState('');
   const [days, setDays] = useState<string>(String(DEFAULT_SHARE_CONFIG.expirationDays));
   const [hours, setHours] = useState<string>('0');
   const [minutes, setMinutes] = useState<string>('0');
   const [viewLimitInput, setViewLimitInput] = useState<string>(
     String(DEFAULT_SHARE_CONFIG.viewLimit)
   );
-  const mutateShare = useCreateShare();
-  const isValidEmail = (email: string): boolean => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
 
-  const calculateExpirationDate = (days: number, hours: number, minutes: number) => {
+  useEffect(() => {
+    if (isEditMode && editingShare) {
+      const now = Date.now();
+      const expiresAt = editingShare.expiresAt ? new Date(editingShare.expiresAt) : null;
+      const remaining = expiresAt ? Math.max(0, expiresAt.getTime() - now) : 0;
+      const d = Math.floor(remaining / (24 * 60 * 60 * 1000));
+      const h = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+      const m = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+      setDays(String(d));
+      setHours(String(h));
+      setMinutes(String(m));
+      setViewLimitInput(String(editingShare.viewLimit));
+      setRecipientName(editingShare.sharedWith || '');
+    }
+  }, [isEditMode, editingShare]);
+
+  const calculateExpirationDate = (d: number, h: number, m: number) => {
     const expirationDate = new Date(
-      Date.now() + days * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000 + minutes * 60 * 1000
+      Date.now() + d * 24 * 60 * 60 * 1000 + h * 60 * 60 * 1000 + m * 60 * 1000
     );
     return expirationDate;
   };
 
-  const handleShare = async () => {
-    if (!repository || !shareEmail.trim() || !isValidEmail(shareEmail.trim())) {
-      return;
-    }
-    const Days = Number(days);
-    const Hours = Number(hours);
-    const Minutes = Number(minutes);
-    const expiresAt = calculateExpirationDate(Days, Hours, Minutes);
+  const isCreateFormValid = !!(recipientName.trim() && repository);
+  const disabled = createMutation.isPending || updateMutation.isPending;
+
+  const handleSubmit = async () => {
+    const d = Number(days);
+    const h = Number(hours);
+    const m = Number(minutes);
+    const expiresAt = calculateExpirationDate(d, h, m);
     const viewLimit = Number(viewLimitInput);
 
-    const share: CreateSharePayload = {
+    if (isEditMode && editingShare) {
+      updateMutation.mutate({
+        id: editingShare.id,
+        updates: { expiresAt: expiresAt, viewLimit },
+      });
+      return;
+    }
+
+    if (!repository || !isCreateFormValid) return;
+
+    const payload = {
       repoOwner: repository.owner.login,
       repoName: repository.name,
       expiresAt,
       viewLimit,
-      sharedWith: shareEmail.trim(),
+      sharedWith: recipientName.trim(),
     };
-
-    // @ts-expect-error - createShare currently expects different shape; server will map expiresAt
-    mutateShare.mutate(share);
+    // @ts-expect-error - TODO: fix this
+    createMutation.mutate(payload);
   };
 
   const handleClose = () => {
-    if (!mutateShare.isPending) {
-      setShareEmail('');
-      setDays(String(DEFAULT_SHARE_CONFIG.expirationDays));
-      setHours('0');
-      setMinutes('0');
-      setViewLimitInput(String(DEFAULT_SHARE_CONFIG.viewLimit));
-      onClose();
-    }
+    if (disabled) return;
+    setRecipientName('');
+    setDays(String(DEFAULT_SHARE_CONFIG.expirationDays));
+    setHours('0');
+    setMinutes('0');
+    setViewLimitInput(String(DEFAULT_SHARE_CONFIG.viewLimit));
+    onClose();
   };
 
-  const isFormValid = !!(shareEmail.trim() && isValidEmail(shareEmail.trim()));
+  const title = isEditMode ? 'Update Share' : 'Share Repository';
+  const description = isEditMode
+    ? `Adjust settings for share ${editingShare?.repoName}`
+    : `Configure sharing settings for "${repository?.name}"`;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Repository</DialogTitle>
-          <DialogDescription>
-            Configure sharing settings for &quot;{repository?.name}&quot;
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Recipient Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="colleague@company.com"
-              value={shareEmail}
-              onChange={(e) => setShareEmail(e.target.value)}
-              className="w-full"
-              disabled={mutateShare.isPending}
-            />
-            {shareEmail.trim() && !isValidEmail(shareEmail.trim()) && (
-              <p className="text-destructive text-xs">Please enter a valid email address</p>
-            )}
-          </div>
+          {!isEditMode && (
+            <div className="space-y-2">
+              <Label htmlFor="recipient">Enter Recipient Name</Label>
+              <Input
+                id="recipient"
+                type="text"
+                placeholder="Recipient name"
+                value={recipientName}
+                onChange={(e) => setRecipientName(e.target.value)}
+                className="w-full"
+                disabled={disabled}
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-2">
@@ -137,9 +161,9 @@ export default function ShareDialog({ repository, isOpen, onClose }: ShareDialog
                   min={0}
                   value={days}
                   onChange={(e) => setDays(e.target.value)}
-                  disabled={mutateShare.isPending}
+                  disabled={disabled}
                   placeholder="Days"
-                  className="w-24"
+                  className="w-20"
                 />
                 <span>:</span>
                 <Input
@@ -149,9 +173,9 @@ export default function ShareDialog({ repository, isOpen, onClose }: ShareDialog
                   max={23}
                   value={hours}
                   onChange={(e) => setHours(e.target.value)}
-                  disabled={mutateShare.isPending}
+                  disabled={disabled}
                   placeholder="Hours"
-                  className="w-24"
+                  className="w-20"
                 />
                 <span>:</span>
                 <Input
@@ -161,9 +185,9 @@ export default function ShareDialog({ repository, isOpen, onClose }: ShareDialog
                   max={59}
                   value={minutes}
                   onChange={(e) => setMinutes(e.target.value)}
-                  disabled={mutateShare.isPending}
+                  disabled={disabled}
                   placeholder="Minutes"
-                  className="w-24"
+                  className="w-20"
                 />
               </div>
             </div>
@@ -177,25 +201,30 @@ export default function ShareDialog({ repository, isOpen, onClose }: ShareDialog
                 min={1}
                 value={viewLimitInput}
                 onChange={(e) => setViewLimitInput(e.target.value)}
-                disabled={mutateShare.isPending}
+                disabled={disabled}
                 placeholder="e.g. 5"
               />
             </div>
           </div>
-
-          {repository && <RepositoryPreview repository={repository} />}
+          {!isEditMode && repository && <RepositoryPreview repository={repository} />}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={mutateShare.isPending}>
+          <Button variant="outline" onClick={handleClose} disabled={disabled}>
             Cancel
           </Button>
           <Button
-            onClick={handleShare}
-            disabled={!isFormValid || mutateShare.isPending}
+            onClick={handleSubmit}
+            disabled={isEditMode ? disabled : !isCreateFormValid || disabled}
             className="min-w-[120px]"
           >
-            {mutateShare.isPending ? 'Creating...' : 'Create Share'}
+            {disabled
+              ? isEditMode
+                ? 'Saving...'
+                : 'Creating...'
+              : isEditMode
+                ? 'Save Changes'
+                : 'Create Share'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,11 +1,6 @@
 import { TIME_CONSTANTS, LANGUAGE_COLORS } from './constants';
-import type { Share, Repository } from '@/types/share';
+import type { Share, Repository, CreateShareRequest } from '@/types/share';
 
-/**
- * Calculates time remaining until expiration in human-readable format
- * @param expiresAt - The expiration date
- * @returns Human-readable time remaining or "Expired"
- */
 export function getTimeUntilExpiration(expiresAt?: Date | string | null): string {
   const expiry = expiresAt ? new Date(expiresAt) : null;
   const diff = expiry ? expiry.getTime() - Date.now() : 0;
@@ -21,11 +16,6 @@ export function getTimeUntilExpiration(expiresAt?: Date | string | null): string
   return 'Soon';
 }
 
-/**
- * Checks if a share is expiring within 1 hour
- * @param share - The share to check
- * @returns True if expiring within 1 hour
- */
 export function isExpiringSoon(share: Share): boolean {
   const expiry = (share as any).expiresAt ? new Date((share as any).expiresAt) : null;
   if (!expiry) return false;
@@ -33,40 +23,18 @@ export function isExpiringSoon(share: Share): boolean {
   return diff > 0 && diff < TIME_CONSTANTS.HOUR_IN_MS;
 }
 
-/**
- * Gets the appropriate color class for a programming language
- * @param language - The programming language
- * @returns Tailwind CSS background color class
- */
 export function getLanguageColor(language: string): string {
   return LANGUAGE_COLORS[language] || 'bg-gray-500';
 }
 
-/**
- * Generates a random share ID for demo purposes
- * @param length - Length of the generated ID
- * @returns Random alphanumeric string
- */
 export function generateShareId(length: number = 9): string {
   return Math.random().toString(36).substr(2, length);
 }
 
-/**
- * Calculates the percentage of views used for a share
- * @param viewCount - Current number of views
- * @param viewLimit - Maximum number of views allowed
- * @returns Percentage as a number between 0 and 100
- */
 export function getViewsUsagePercentage(viewCount: number, viewLimit: number): number {
   return Math.min((viewCount / viewLimit) * 100, 100);
 }
 
-/**
- * Formats a date for display in the dashboard
- * @param date - The date to format
- * @param options - Intl.DateTimeFormat options
- * @returns Formatted date string
- */
 // export function formatDate(date: Date, options?: Intl.DateTimeFormatOptions): string {
 //   const defaultOptions: Intl.DateTimeFormatOptions = {
 //     year: 'numeric',
@@ -77,11 +45,6 @@ export function getViewsUsagePercentage(viewCount: number, viewLimit: number): n
 //   return date.toLocaleDateString('en-US', { ...defaultOptions, ...options });
 // }
 
-/**
- * Formats GitHub join date for profile display
- * @param dateString - ISO date string from GitHub API
- * @returns Formatted date like "March 2018"
- */
 export function formatGitHubJoinDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     month: 'long',
@@ -89,21 +52,10 @@ export function formatGitHubJoinDate(dateString: string): string {
   });
 }
 
-/**
- * Truncates email for display purposes
- * @param email - Full email address
- * @returns Username part of the email (before @)
- */
 export function truncateEmail(email: string): string {
   return email.split('@')[0];
 }
 
-/**
- * Determines the badge variant based on share expiration proximity
- * - expired: destructive (red)
- * - < 1 hour: warning (amber)
- * - >= 1 hour: success (green)
- */
 export function getShareStatusVariant(
   share: Share
 ): 'secondary' | 'destructive' | 'warning' | 'success' {
@@ -115,12 +67,6 @@ export function getShareStatusVariant(
   return 'success';
 }
 
-/**
- * Sorts repositories based on the specified criteria
- * @param repositories - Array of repositories to sort
- * @param sortBy - Sort criteria
- * @returns Sorted array of repositories
- */
 export function sortRepositories(
   repositories: Repository[],
   sortBy: 'name' | 'updated' | 'size'
@@ -141,13 +87,6 @@ export function sortRepositories(
   });
 }
 
-/**
- * Filters repositories based on search query and language filter
- * @param repositories - Array of repositories to filter
- * @param searchQuery - Search query string
- * @param languageFilter - Language filter ('all' for no filter)
- * @returns Filtered array of repositories
- */
 export function filterRepositories(
   repositories: Repository[],
   searchQuery: string,
@@ -172,12 +111,86 @@ export function filterRepositories(
   return filtered;
 }
 
-/**
- * Gets unique languages from repository array
- * @param repositories - Array of repositories
- * @returns Sorted array of unique languages
- */
 export function getUniqueLanguages(repositories: Repository[]): string[] {
   const languages = Array.from(new Set(repositories.map((repo) => repo.language)));
   return languages.sort();
+}
+
+export interface FormattedShare extends Share {
+  formattedExpiryDate: string;
+  isExpired: boolean;
+  isExpiringSoon: boolean;
+  remainingViews: number;
+}
+
+export function validateShareRequest(data: CreateShareRequest): {
+  isValid: boolean;
+  errors: string[];
+} {
+  const errors: string[] = [];
+
+  if (!data.repoOwner?.trim()) {
+    errors.push('Repository owner is required');
+  }
+
+  if (!data.repoName?.trim()) {
+    errors.push('Repository name is required');
+  }
+
+  if (!data.sharedWith?.trim()) {
+    errors.push('Email address is required');
+  } else if (!isValidEmail(data.sharedWith)) {
+    errors.push('Invalid email address');
+  }
+
+  if (data.expirationDays < 1 || data.expirationDays > 365) {
+    errors.push('Expiration days must be between 1 and 365');
+  }
+
+  if (data.viewLimit < 1 || data.viewLimit > 1000) {
+    errors.push('View limit must be between 1 and 1000');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+export function formatShareForDisplay(share: Share): FormattedShare {
+  const now = new Date();
+  const expiryDate = new Date(share.expiresAt);
+  const isExpired = expiryDate < now;
+  const isExpiringSoon =
+    !isExpired && expiryDate.getTime() - now.getTime() < 7 * 24 * 60 * 60 * 1000; // 7 days
+
+  return {
+    ...share,
+    formattedExpiryDate: expiryDate.toLocaleDateString(),
+    isExpired,
+    isExpiringSoon,
+    remainingViews: Math.max(0, share.viewLimit - share.viewCount),
+  };
+}
+
+export function calculateShareExpiry(expirationDays: number): Date {
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + expirationDays);
+  return expiryDate;
+}
+
+export function generateShareLink(shareId: string): string {
+  return `${window.location.origin}/share/${shareId}`;
+}
+
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+export function isShareActive(share: Share): boolean {
+  const now = new Date();
+  const expiryDate = new Date(share.expiresAt);
+
+  return share.status === 'active' && expiryDate > now && share.viewCount < share.viewLimit;
 }
