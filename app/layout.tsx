@@ -18,8 +18,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'GitHub Readonly Share',
-  description: 'Share GitHub repositories as readonly views with GitHub-inspired dark mode',
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      },
+      {
+        url: '/favicon.ico',
+      },
+    ],
+  },
+  title: 'Prepoview',
+  description: 'Share private repos read‑only with time & view limits',
   other: {
     'color-scheme': 'light dark',
   },

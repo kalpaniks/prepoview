@@ -6,11 +6,14 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Shield } from 'lucide-react';
 import { useRepositorySearch } from '@/hooks/use-repository-search';
 import { useShareManagement } from '@/hooks/use-share-management';
-import { Sidebar, RepositorySearchSection, ShareDialog, ShareTable } from '@/components/share';
+import Sidebar from '@/components/share/Sidebar';
+import RepositorySearchSection from '@/components/share/RepositorySearchSection';
+import ShareDialog from '@/components/share/ShareDialog';
+import ShareTable from '@/components/share/ShareTable';
+import ConfirmationDialog from '@/components/share/ConfirmationDialog';
 import type { Repository } from '@/types/share';
 import { useGithubProfileQuery, useReposQuery } from '@/hooks/queries';
 import { useShareAnalytics } from '@/hooks/use-share-analytics';
-import ConfirmationDialog from '@/components/share/ConfirmationDialog';
 
 function DashboardHeader({
   onRevokeAll,
