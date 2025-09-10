@@ -13,11 +13,19 @@ export default function ConfirmationDialog({
   onClose,
   onConfirm,
   isLoading,
+  title = 'Are you sure?',
+  description = 'This action cannot be undone.',
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
 }: {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   isLoading: boolean;
+  title?: string;
+  description?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
 }) {
   return (
     <Dialog
@@ -28,18 +36,15 @@ export default function ConfirmationDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Revoke all shares?</DialogTitle>
-          <DialogDescription>
-            This will permanently revoke access to all your active shares. This action cannot be
-            undone.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            Cancel
+            {cancelLabel}
           </Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isLoading}>
-            {isLoading ? 'Revoking…' : 'Revoke All'}
+            {isLoading ? `${confirmLabel}…` : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

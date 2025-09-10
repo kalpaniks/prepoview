@@ -14,6 +14,8 @@ import ConfirmationDialog from '@/components/share/ConfirmationDialog';
 import type { Repository } from '@/types/share';
 import { useGithubProfileQuery, useReposQuery } from '@/hooks/queries';
 import { useShareAnalytics } from '@/hooks/use-share-analytics';
+import { revokeGithubAccess } from '@/lib/api/user';
+import { signOut } from 'next-auth/react';
 
 function DashboardHeader({
   onRevokeAll,
@@ -35,7 +37,7 @@ function DashboardHeader({
             disabled={isDeletingAllShares}
           >
             <Shield className="mr-2 h-4 w-4" />
-            Revoke All
+            Revoke Access Token
           </Button>
         </div>
       </div>
@@ -78,14 +80,13 @@ export default function SharePage() {
     setIsConfirmRevokeAllOpen(true);
   }, []);
 
-  const confirmRevokeAllShares = useCallback(() => {
-    if (shareManagement.isDeletingAllShares) return;
-    shareManagement.deleteAllShares(undefined, {
-      onSuccess: () => {
-        setIsConfirmRevokeAllOpen(false);
-      },
-    });
-  }, [shareManagement.isDeletingAllShares, shareManagement.deleteAllShares]);
+  const confirmRevokeAllShares = useCallback(async () => {
+    try {
+      await revokeGithubAccess();
+      setIsConfirmRevokeAllOpen(false);
+      await signOut({ callbackUrl: '/' });
+    } catch (e) {}
+  }, []);
 
   return (
     <div className="bg-background flex h-screen">
@@ -139,7 +140,11 @@ export default function SharePage() {
         isOpen={isConfirmRevokeAllOpen}
         onClose={() => setIsConfirmRevokeAllOpen(false)}
         onConfirm={confirmRevokeAllShares}
-        isLoading={shareManagement.isDeletingAllShares}
+        isLoading={false}
+        title="Revoke GitHub Access Token?"
+        description="This will remove the stored GitHub credentials and sign you out. You can reconnect later from login."
+        confirmLabel="Revoke & Sign Out"
+        cancelLabel="Cancel"
       />
     </div>
   );

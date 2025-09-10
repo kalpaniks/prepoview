@@ -23,3 +23,14 @@ export async function fetchGithubProfile() {
   const data = await response.json();
   return data;
 }
+
+export async function revokeGithubAccess(): Promise<void> {
+  const response = await fetch(`/api/user/revoke`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err?.error || 'Failed to revoke access');
+  }
+}
