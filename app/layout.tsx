@@ -24,9 +24,6 @@ export const metadata: Metadata = {
         url: '/favicon.svg',
         type: 'image/svg+xml',
       },
-      {
-        url: '/favicon.ico',
-      },
     ],
   },
   title: 'Prepoview',

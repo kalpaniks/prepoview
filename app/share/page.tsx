@@ -80,8 +80,11 @@ export default function SharePage() {
 
   const confirmRevokeAllShares = useCallback(() => {
     if (shareManagement.isDeletingAllShares) return;
-    shareManagement.deleteAllShares();
-    setIsConfirmRevokeAllOpen(false);
+    shareManagement.deleteAllShares(undefined, {
+      onSuccess: () => {
+        setIsConfirmRevokeAllOpen(false);
+      },
+    });
   }, [shareManagement.isDeletingAllShares, shareManagement.deleteAllShares]);
 
   return (

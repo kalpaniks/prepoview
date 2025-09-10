@@ -29,9 +29,11 @@ function RepositoryPreview({ repository }: { repository: Repository }) {
       <div className="flex items-center gap-2 text-sm">
         <GitBranch className="text-muted-foreground h-4 w-4" />
         <span className="font-medium">{repository.name}</span>
-        <Badge variant="outline" className="text-xs">
-          {repository.language}
-        </Badge>
+        {repository.language && (
+          <Badge variant="outline" className="text-xs">
+            {repository.language}
+          </Badge>
+        )}
       </div>
       {repository.description && (
         <p className="text-muted-foreground mt-1 text-xs">{repository.description}</p>
@@ -92,10 +94,17 @@ export default function ShareDialog({
     const viewLimit = Number(viewLimitInput);
 
     if (isEditMode && editingShare) {
-      updateMutation.mutate({
-        id: editingShare.id,
-        updates: { expiresAt: expiresAt, viewLimit },
-      });
+      updateMutation.mutate(
+        {
+          id: editingShare.id,
+          updates: { expiresAt: expiresAt, viewLimit },
+        },
+        {
+          onSuccess: () => {
+            onClose();
+          },
+        }
+      );
       return;
     }
 
@@ -109,7 +118,11 @@ export default function ShareDialog({
       sharedWith: recipientName.trim(),
     };
     // @ts-expect-error - TODO: fix this
-    createMutation.mutate(payload);
+    createMutation.mutate(payload, {
+      onSuccess: () => {
+        onClose();
+      },
+    });
   };
 
   const handleClose = () => {
@@ -206,7 +219,7 @@ export default function ShareDialog({
               />
             </div>
           </div>
-          {!isEditMode && repository && <RepositoryPreview repository={repository} />}
+          {repository && <RepositoryPreview repository={repository} />}
         </div>
 
         <DialogFooter>
