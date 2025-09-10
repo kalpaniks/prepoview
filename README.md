@@ -10,19 +10,6 @@ Prepoview lets you share time‑boxed, read‑only access to your private GitHub
 
 For better privacy and security you can always self host this repository.
 
-## Demo
-
-- Landing: `/`
-- Dashboard: `/share`
-
-## Features
-
-- Time‑boxed access with server‑enforced expiry
-- View limits (counted per viewer session)
-- Read‑only file browser and code viewer (Monaco)
-- No download: stream per‑file, no raw repo checkout
-- Revoke GitHub token from the app (signs you out)
-
 ## Tech stack
 
 - Next.js (App Router), React 19, TypeScript
