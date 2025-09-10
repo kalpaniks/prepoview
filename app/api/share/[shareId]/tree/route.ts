@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShareDetails } from '@/lib/share';
+import { getShareDetails, requireValidViewSession } from '@/lib/share';
 import { getTree } from '@/lib/github';
 import { getDecryptedTokensForUser } from '@/lib/adapter';
 import prisma from '@/lib/prisma';
@@ -78,6 +78,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
 
   if (!shareId) {
     return NextResponse.json({ error: 'Share ID is required' }, { status: 400 });
+  }
+
+  const sessionId = req.cookies.get('viewer_session')?.value;
+  try {
+    await requireValidViewSession(shareId, sessionId);
+  } catch (error) {
+    const res = NextResponse.json({ error: 'Access Denied' }, { status: 403 });
+    res.cookies.delete('viewer_session');
+    return res;
   }
 
   try {
