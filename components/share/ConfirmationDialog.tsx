@@ -35,18 +35,10 @@ export default function ConfirmationDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={isLoading}
-          >
+          <Button variant="destructive" onClick={onConfirm} disabled={isLoading}>
             {isLoading ? 'Revoking…' : 'Revoke All'}
           </Button>
         </DialogFooter>

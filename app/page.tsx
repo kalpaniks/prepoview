@@ -72,8 +72,8 @@ export default function Home() {
                   <p className="text-[11px]">Count once per session. Race‑proof increments.</p>
                 </div>
                 <div className="border-border/60 rounded-md border p-3">
-                  <p className="text-xs font-medium">No downloads</p>
-                  <p className="text-[11px]">File content streamed, no raw repo checkout.</p>
+                  <p className="text-xs font-medium">No direct copy</p>
+                  <p className="text-[11px]">File content streamed, no direct copy and download.</p>
                 </div>
               </div>
             </div>
@@ -89,10 +89,10 @@ export default function Home() {
               <span className="hidden sm:inline">Built with security in mind</span>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/privacy" className="hover:text-foreground transition-colors">
+              <Link href="/legal#privacy" className="hover:text-foreground transition-colors">
                 Privacy
               </Link>
-              <Link href="/terms" className="hover:text-foreground transition-colors">
+              <Link href="/legal#terms" className="hover:text-foreground transition-colors">
                 Terms
               </Link>
             </div>

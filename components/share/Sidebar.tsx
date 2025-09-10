@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Activity, GitBranch, Clock, Settings, Shield } from 'lucide-react';
+import { Users, Activity, GitBranch, Clock, Shield } from 'lucide-react';
 import type { GitHubProfile, ShareAnalytics, Share } from '@/types/share';
 import { truncateEmail, isExpiringSoon } from '@/utils/share/helpers';
 import Image from 'next/image';
 import { Skeleton } from '../ui/skeleton';
+import Link from 'next/link';
 
 interface SidebarProps {
   profile: GitHubProfile;
@@ -199,13 +200,11 @@ function QuickActionsSection() {
   return (
     <div className="border-border/50 bg-card sticky bottom-0 mt-auto border-t pt-4 pb-4">
       <div className="space-y-1">
-        <Button variant="ghost" className="h-8 w-full justify-start text-sm" size="sm">
-          <Settings className="mr-2 h-4 w-4" />
-          Sharing Settings
-        </Button>
-        <Button variant="ghost" className="h-8 w-full justify-start text-sm" size="sm">
-          <Shield className="mr-2 h-4 w-4" />
-          Security & Permissions
+        <Button variant="ghost" className="h-8 w-full justify-start text-sm" size="sm" asChild>
+          <Link href="/legal#permissions">
+            <Shield className="mr-2 h-4 w-4" />
+            Security & Permissions
+          </Link>
         </Button>
       </div>
     </div>
