@@ -1,5 +1,6 @@
 import Header from '@/components/landing/Header';
 import HeroSection from '@/components/landing/HeroSection';
+import SecuritySection from '@/components/landing/SecuritySection';
 import Footer from '@/components/landing/Footer';
 
 export default function Home() {
@@ -8,6 +9,7 @@ export default function Home() {
       <div className="border-border/60 mx-auto flex min-h-screen w-full max-w-6xl flex-col border">
         <Header />
         <HeroSection />
+        <SecuritySection />
         <Footer />
       </div>
     </div>

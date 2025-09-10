@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prepoview – Share private repos, read‑only
 
-## Getting Started
+Prepoview lets you share time‑boxed, read‑only access to your private GitHub repositories without adding collaborators. Enforce expiration and view limits; no downloads.
 
-First, run the development server:
+- Encrypted OAuth tokens at rest – never stored in plaintext
+- Viewer sessions validated on every request; instant revoke
+- Read‑only GitHub access – no writes, no clone/archives
+
+## Self Hosting
+
+For better privacy and security you can always self host this repository.
+
+## Demo
+
+- Landing: `/`
+- Dashboard: `/share`
+
+## Features
+
+- Time‑boxed access with server‑enforced expiry
+- View limits (counted per viewer session)
+- Read‑only file browser and code viewer (Monaco)
+- No download: stream per‑file, no raw repo checkout
+- Revoke GitHub token from the app (signs you out)
+
+## Tech stack
+
+- Next.js (App Router), React 19, TypeScript
+- NextAuth + Prisma (PostgreSQL)
+- Tailwind v4 + Shadcn
+- Monaco Editor
+
+## Getting started
+
+Requirements:
+
+- Node 18+ and pnpm
+- PostgreSQL database
+- GitHub OAuth App (Client ID/Secret)
+
+1. Install deps
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Configure environment
+   Create `.env.local` with:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# GitHub OAuth App
+GITHUB_ID=your_github_client_id
+GITHUB_SECRET=your_github_client_secret
 
-## Learn More
+# Database
+DATABASE_URL=postgresql://user:pass@localhost:5432/prepoview
+DIRECT_URL=postgresql://user:pass@localhost:5432/prepoview
 
-To learn more about Next.js, take a look at the following resources:
+# Encryption (64 hex chars for AES-256-GCM)
+ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Generate client & run migrations
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
 
-## Deploy on Vercel
+4. Start the app
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm dev
+# http://localhost:3000
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## OAuth scopes & security
+
+See detailed policy in `/legal` (Terms, Privacy, Permissions).
+
+## Project structure
+
+```
+app/                # App Router pages & API routes
+components/         # UI and features (editor, share, landing)
+hooks/              # React Query hooks
+lib/                # auth, crypto, prisma, API helpers
+prisma/             # Prisma schema & migrations
+services/           # Service-layer helpers
+utils/              # Share utilities
+```
+
+## Scripts
+
+```bash
+pnpm dev            # start dev server
+pnpm build          # build
+pnpm start          # start production server
+pnpm db:generate    # prisma generate
+pnpm db:migrate     # migrate dev
+pnpm db:studio      # prisma studio
+pnpm lint           # lint
+pnpm format         # format with prettier
+```
+
+## Contributing
+
+Contributions are welcome! Please:
+
+- Open an issue for discussion / proposal
+- Keep PRs focused and well‑described
+- Match existing code style (see ESLint/Prettier configs)
+
+### Development guidelines
+
+- Favor server‑side validation for access control (expiry/limits)
+- Avoid duplicating business rules across endpoints
+- Never log secrets; prefer explicit error messages
+- Keep components accessible and keyboard‑friendly
+
+## License
+
+MIT © {2025} Prepoview contributors

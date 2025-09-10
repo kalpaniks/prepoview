@@ -2,7 +2,7 @@ import { LoginWithGitHub } from '@/components/auth/Login';
 
 export default function HeroSection() {
   return (
-    <main className="relative mx-auto flex w-full flex-1 flex-col items-center justify-center px-4 sm:px-6">
+    <main className="relative mx-auto flex min-h-[calc(100vh-7rem)] w-full flex-1 flex-col items-center justify-center px-4 sm:px-6">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_rgba(120,119,198,0.06),transparent_50%),radial-gradient(ellipse_at_bottom,_rgba(16,185,129,0.06),transparent_50%)]" />
 
       <section className="w-full">
@@ -20,7 +20,7 @@ export default function HeroSection() {
 
           <p className="text-muted-foreground mx-auto mt-3 max-w-xl text-center text-sm sm:text-base">
             Grant safe, temporary access to your code without adding collaborators. Enforce
-            expiration and view caps. No downloads.
+            expiration and view caps. No copy .
           </p>
 
           <div className="mt-7 flex items-center justify-center gap-3">
