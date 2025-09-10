@@ -8,11 +8,25 @@ export async function fetchUserShares() {
     throw new Error('Failed to fetch user shares');
   }
   const data = await response.json();
-  return data.map((s: Share) => ({
-    ...s,
-    createdAt: new Date(s.createdAt),
-    expiresAt: s.expiresAt ? new Date(s.expiresAt) : null,
-  })) as Share[];
+  const now = Date.now();
+  return data.map((s: Share) => {
+    const createdAt = new Date(s.createdAt);
+    const expiresAt = s.expiresAt ? new Date(s.expiresAt) : null;
+    const viewCount = typeof s.viewCount === 'number' ? s.viewCount : 0;
+    const viewLimit = typeof s.viewLimit === 'number' && s.viewLimit > 0 ? s.viewLimit : 1000;
+    const expired = !!(expiresAt && expiresAt.getTime() <= now);
+    const overLimit = viewCount >= viewLimit;
+    const status: 'active' | 'expired' | 'revoked' = expired || overLimit ? 'expired' : 'active';
+
+    return {
+      ...s,
+      createdAt,
+      expiresAt,
+      viewCount,
+      viewLimit,
+      status,
+    } as Share;
+  }) as Share[];
 }
 
 export async function createShare(share: CreateShareRequest): Promise<string> {
@@ -58,8 +72,8 @@ export async function deleteShare(shareId: string) {
   }
 }
 
-export async function fetchShare(id: string) {
-  const response = await fetch(`/api/share/${id}`, {
+export async function fetchShare(shareId: string) {
+  const response = await fetch(`/api/share?shareId=${shareId}`, {
     credentials: 'include',
   });
   if (!response.ok) {

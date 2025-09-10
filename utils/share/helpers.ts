@@ -32,6 +32,7 @@ export function generateShareId(length: number = 9): string {
 }
 
 export function getViewsUsagePercentage(viewCount: number, viewLimit: number): number {
+  if (!viewLimit || viewLimit <= 0) return 0;
   return Math.min((viewCount / viewLimit) * 100, 100);
 }
 

@@ -36,8 +36,12 @@ async function createShare(shareRequest: CreateShareRequest): Promise<string> {
   }
 }
 
-async function updateShare(id: string, updates: Partial<Share>): Promise<Share> {
-  const share = await prisma.share.update({ where: { id }, data: updates });
+async function updateShare(id: string, updates: Partial<Share>, userId: string): Promise<Share> {
+  const existing = await prisma.share.findUnique({ where: { id } });
+  if (!existing || existing.userId !== userId) {
+    throw new Error('Share not found or not owned by user');
+  }
+  const share = await prisma.share.update({ where: { id, userId }, data: updates });
   return share;
 }
 
@@ -69,8 +73,15 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { id, expiresAt, viewLimit } = await request.json();
-  const share = await updateShare(id, { expiresAt, viewLimit });
-  return NextResponse.json(share);
+  try {
+    const share = await updateShare(id, { expiresAt, viewLimit }, session.user.id);
+    return NextResponse.json(share);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to update share' },
+      { status: 403 }
+    );
+  }
 }
 
 export async function DELETE(req: NextRequest) {

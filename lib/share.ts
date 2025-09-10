@@ -50,17 +50,6 @@ export async function createViewSession(shareId: string, ttlMin = 30): Promise<V
 
 export async function requireValidViewSession(shareId: string, sessionId?: string) {
   const now = new Date();
-
-  const share = await prisma.share.findUnique({ where: { id: shareId } });
-  if (!share) {
-    throw new Error('Share not found');
-  }
-  if (share.expiresAt && share.expiresAt <= now) {
-    throw new Error('Share is expired');
-  }
-  if (share.viewLimit && share.viewCount >= share.viewLimit) {
-    throw new Error('Share has reached the maximum number of views');
-  }
   if (!sessionId) {
     throw new Error('No session ID found');
   }
@@ -71,5 +60,14 @@ export async function requireValidViewSession(shareId: string, sessionId?: strin
   if (session.expiresAt && session.expiresAt <= now) {
     throw new Error('Session has expired');
   }
+
+  const share = await prisma.share.findUnique({ where: { id: shareId } });
+  if (!share) {
+    throw new Error('Share not found');
+  }
+  if (share.expiresAt && share.expiresAt <= now) {
+    throw new Error('Share is expired');
+  }
+
   return { hasAccess: true };
 }

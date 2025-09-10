@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
     await requireValidViewSession(shareId, sessionId);
   } catch {
     const response = NextResponse.json({ error: 'Access Denied' }, { status: 403 });
-    response.cookies.delete('viewer_session');
+    response.cookies.delete({ name: 'viewer_session', path: `/api/share/${shareId}` });
     return response;
   }
   const filePath = req.nextUrl.searchParams.get('filePath');

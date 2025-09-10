@@ -63,7 +63,9 @@ export default function TreeView({
 
   const fetchDirectoryContents = async (directoryPath: string): Promise<GitHubItem[]> => {
     const encodedPath = encodeURIComponent(directoryPath);
-    const response = await fetch(`/api/share/${shareId}/tree?path=${encodedPath}`);
+    const response = await fetch(`/api/share/${shareId}/tree?path=${encodedPath}`, {
+      credentials: 'include',
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch directory: ${response.statusText}`);

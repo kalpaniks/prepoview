@@ -197,8 +197,8 @@ function RecentActivitySection({ recentActivity }: { recentActivity: Share[] }) 
 
 function QuickActionsSection() {
   return (
-    <div className="border-border/50 bg-card/30 sticky bottom-0 mt-auto border-t px-6 pt-4 pb-4">
-      <div className="space-y-1.5">
+    <div className="border-border/50 bg-card sticky bottom-0 mt-auto border-t pt-4 pb-4">
+      <div className="space-y-1">
         <Button variant="ghost" className="h-8 w-full justify-start text-sm" size="sm">
           <Settings className="mr-2 h-4 w-4" />
           Sharing Settings

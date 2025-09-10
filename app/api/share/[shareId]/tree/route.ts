@@ -85,18 +85,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shar
     await requireValidViewSession(shareId, sessionId);
   } catch (error) {
     const res = NextResponse.json({ error: 'Access Denied' }, { status: 403 });
-    res.cookies.delete('viewer_session');
+    // Ensure cookie deletion path matches the path used when setting the cookie
+    res.cookies.delete({ name: 'viewer_session', path: `/api/share/${shareId}` });
     return res;
   }
 
   try {
     const share = await getShareDetails(shareId);
-    if (share.expiresAt && share.expiresAt < new Date()) {
-      return NextResponse.json({ error: 'Share is expired' }, { status: 403 });
-    }
-    if (share.viewLimit && share.viewCount >= share.viewLimit) {
-      return NextResponse.json({ error: 'Share view limit reached' }, { status: 403 });
-    }
 
     const tokens = await getDecryptedTokensForUser(prisma, share.userId, 'github');
 
