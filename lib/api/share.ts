@@ -70,6 +70,7 @@ export async function deleteShare(shareId: string) {
   if (!response.ok) {
     throw new Error('Failed to delete share');
   }
+  return response.json();
 }
 
 export async function fetchShare(shareId: string) {
@@ -85,4 +86,15 @@ export async function fetchShare(shareId: string) {
     createdAt: new Date(data.createdAt),
     expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
   } as Share;
+}
+
+export async function deleteAllShares() {
+  const response = await fetch(`/api/user/shares`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete all shares');
+  }
+  return response.json();
 }

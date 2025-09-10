@@ -6,6 +6,7 @@ import {
   deleteShare,
   fetchUserShares,
   fetchShare,
+  deleteAllShares,
 } from '@/lib/api/share';
 import { validateShareRequest } from '@/services/shareService';
 import { toast } from 'sonner';
@@ -83,12 +84,27 @@ export function useDeleteShare() {
   });
 }
 
+export function useDeleteAllShares() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteAllShares(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shares'] });
+      toast.success('All shares deleted successfully!');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete all shares: ${error.message}`);
+    },
+  });
+}
+
 export function useShareManagement() {
   const sharesQuery = useFetchShares();
   const createShareMutation = useCreateShare();
   const updateShareMutation = useUpdateShare();
   const deleteShareMutation = useDeleteShare();
-
+  const deleteAllSharesMutation = useDeleteAllShares();
   return {
     // State
     shares: sharesQuery.data || [],
@@ -100,9 +116,11 @@ export function useShareManagement() {
     createShare: createShareMutation.mutate,
     updateShare: updateShareMutation.mutate,
     deleteShare: deleteShareMutation.mutate,
+    deleteAllShares: deleteAllSharesMutation.mutate,
     isCreating: createShareMutation.isPending,
     isUpdating: updateShareMutation.isPending,
     isDeleting: deleteShareMutation.isPending,
+    isDeletingAllShares: deleteAllSharesMutation.isPending,
     refetch: sharesQuery.refetch,
   };
 }

@@ -38,3 +38,21 @@ export async function GET(): Promise<NextResponse> {
   const shares = await getUserShares(session?.user?.id);
   return NextResponse.json(shares);
 }
+
+export async function DELETE(): Promise<NextResponse> {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const userId = session.user.id;
+  if (!userId) {
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+  }
+  try {
+    await prisma.share.deleteMany({ where: { userId: userId } });
+    return NextResponse.json({ message: 'All shares deleted' });
+  } catch (error) {
+    console.error('Error deleting shares:', error);
+    return NextResponse.json({ error: 'Failed to delete shares' }, { status: 500 });
+  }
+}

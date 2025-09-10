@@ -4,15 +4,21 @@ import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Shield } from 'lucide-react';
-import { toast } from 'sonner';
 import { useRepositorySearch } from '@/hooks/use-repository-search';
 import { useShareManagement } from '@/hooks/use-share-management';
 import { Sidebar, RepositorySearchSection, ShareDialog, ShareTable } from '@/components/share';
 import type { Repository } from '@/types/share';
 import { useGithubProfileQuery, useReposQuery } from '@/hooks/queries';
 import { useShareAnalytics } from '@/hooks/use-share-analytics';
+import ConfirmationDialog from '@/components/share/ConfirmationDialog';
 
-function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
+function DashboardHeader({
+  onRevokeAll,
+  isDeletingAllShares,
+}: {
+  onRevokeAll: () => void;
+  isDeletingAllShares: boolean;
+}) {
   return (
     <div className="border-border/60 bg-card/40 border-b px-6 py-4">
       <div className="flex items-center justify-end">
@@ -23,6 +29,7 @@ function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
             size="sm"
             onClick={onRevokeAll}
             className="text-destructive hover:text-destructive"
+            disabled={isDeletingAllShares}
           >
             <Shield className="mr-2 h-4 w-4" />
             Revoke All
@@ -36,6 +43,7 @@ function DashboardHeader({ onRevokeAll }: { onRevokeAll: () => void }) {
 export default function SharePage() {
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isConfirmRevokeAllOpen, setIsConfirmRevokeAllOpen] = useState(false);
   const {
     data: repos,
     isLoading: isReposLoading,
@@ -64,10 +72,14 @@ export default function SharePage() {
   }, []);
 
   const handleRevokeAllShares = useCallback(() => {
-    toast.error('All shares revoked', {
-      description: 'All active shares have been invalidated',
-    });
+    setIsConfirmRevokeAllOpen(true);
   }, []);
+
+  const confirmRevokeAllShares = useCallback(() => {
+    if (shareManagement.isDeletingAllShares) return;
+    shareManagement.deleteAllShares();
+    setIsConfirmRevokeAllOpen(false);
+  }, [shareManagement.isDeletingAllShares, shareManagement.deleteAllShares]);
 
   return (
     <div className="bg-background flex h-screen">
@@ -79,7 +91,10 @@ export default function SharePage() {
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <DashboardHeader onRevokeAll={handleRevokeAllShares} />
+        <DashboardHeader
+          onRevokeAll={handleRevokeAllShares}
+          isDeletingAllShares={shareManagement.isDeletingAllShares}
+        />
 
         <div className="flex-1 space-y-6 overflow-auto p-6">
           <RepositorySearchSection
@@ -112,6 +127,13 @@ export default function SharePage() {
         repository={selectedRepo}
         isOpen={isShareDialogOpen}
         onClose={closeShareDialog}
+      />
+
+      <ConfirmationDialog
+        isOpen={isConfirmRevokeAllOpen}
+        onClose={() => setIsConfirmRevokeAllOpen(false)}
+        onConfirm={confirmRevokeAllShares}
+        isLoading={shareManagement.isDeletingAllShares}
       />
     </div>
   );
