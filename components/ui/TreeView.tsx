@@ -233,7 +233,7 @@ export default function TreeView({
   return (
     <div className="border-border-default bg-bg-default h-full overflow-y-auto border-r shadow-sm">
       <div className="border-border-default bg-bg-muted border-b px-4 py-3">
-        <h2 className="text-fg-default text-sm font-semibold">Files</h2>
+        <h2 className="text-fg-default text-base font-medium">Files</h2>
       </div>
 
       <div className="py-2">

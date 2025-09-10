@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Editor as MonacoEditor } from '@monaco-editor/react';
 import { File, Loader2 } from 'lucide-react';
+import type { editor as MonacoEditorNS, IKeyboardEvent } from 'monaco-editor';
 
 interface CodeEditorProps {
   shareId: string;
@@ -241,6 +242,45 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
   const [error, setError] = useState<string | null>(null);
   const isDarkTheme = useTheme();
 
+  const handleContainerKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const isCombo = e.ctrlKey || e.metaKey;
+    const code = e.keyCode;
+    // Block: C(67), X(88), S(83), P(80), A(65)
+    if (isCombo && (code === 67 || code === 88 || code === 83 || code === 80 || code === 65)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  }, []);
+
+  const handleClipboard = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  }, []);
+
+  const onEditorMount = useCallback(
+    (editor: MonacoEditorNS.IStandaloneCodeEditor, monacoInstance: Monaco) => {
+      editor.onKeyDown((evt: IKeyboardEvent) => {
+        const isCombo = evt.ctrlKey || evt.metaKey;
+        const code = evt.keyCode;
+        if (
+          isCombo &&
+          (code === monacoInstance.KeyCode.KeyC ||
+            code === monacoInstance.KeyCode.KeyX ||
+            code === monacoInstance.KeyCode.KeyS ||
+            code === monacoInstance.KeyCode.KeyP ||
+            code === monacoInstance.KeyCode.KeyA)
+        ) {
+          evt.preventDefault();
+          evt.stopPropagation();
+        }
+      });
+    },
+    []
+  );
+
   const fetchFileContent = useCallback(
     async (filePath: string) => {
       setIsLoading(true);
@@ -365,7 +405,13 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
   const lineCount = fileContent?.content ? getLineCount(fileContent.content) : 0;
 
   return (
-    <div className="bg-bg-default flex h-full flex-col">
+    <div
+      className="bg-bg-default flex h-full flex-col select-none"
+      onContextMenu={handleContextMenu}
+      onCopy={handleClipboard}
+      onCut={handleClipboard}
+      onKeyDown={handleContainerKeyDown}
+    >
       {/* GitHub-style file header */}
       <div className="border-border-default bg-bg-default border-b px-4 py-3">
         <div className="flex items-center justify-between">
@@ -393,10 +439,11 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
           value={fileContent?.content || ''}
           theme={isDarkTheme ? 'github-dark' : 'github-light'}
           beforeMount={defineGitHubThemes}
+          onMount={onEditorMount}
           options={{
             // GitHub-like editor options
             readOnly: true,
-
+            contextmenu: false,
             // Font settings - GitHub uses system fonts
             fontFamily:
               'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
@@ -446,7 +493,7 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
             renderWhitespace: 'none',
           }}
           loading={
-            <div className="flex h-full items-center justify-center bg-white">
+            <div className="flex h-full items-center justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
             </div>
           }

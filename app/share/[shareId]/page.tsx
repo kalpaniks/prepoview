@@ -31,7 +31,7 @@ export default async function SharePage({ params }: SharePageProps) {
   return (
     <div className="bg-bg-muted flex h-screen w-full flex-col">
       <div className="border-border-default bg-bg-default border-b shadow-sm">
-        <div className="px-6 py-4">
+        <div className="px-6 pt-4 pb-2">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="mb-3 flex items-center space-x-2">
