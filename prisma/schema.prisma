@@ -16,7 +16,6 @@ model User {
   emailVerified  DateTime?
   image          String?
   githubId       String?   @unique
-  accessToken    String?
   revokedAt      DateTime?
   createdAt      DateTime  @default(now())
   accounts       Account[]
@@ -36,10 +35,12 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
+  createdAt         DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId, provider])
 }
 
 

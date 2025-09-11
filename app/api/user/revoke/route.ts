@@ -25,7 +25,6 @@ export async function POST(): Promise<NextResponse> {
       await tx.user.update({
         where: { id: session.user.id },
         data: {
-          accessToken: null,
           githubId: null,
           revokedAt: new Date(),
         },

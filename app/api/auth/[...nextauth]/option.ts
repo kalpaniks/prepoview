@@ -31,35 +31,40 @@ export const authOptions: NextAuthOptions = {
             select: { revokedAt: true },
           });
 
-          if (existingUser?.revokedAt !== null && existingUser?.revokedAt !== undefined) {
-            await prisma.$transaction(async (tx) => {
-              await tx.account.updateMany({
-                where: { userId: user.id, provider: 'github' },
-                data: {
-                  access_token: account.access_token ? encrypt(account.access_token) : null,
-                  refresh_token: account.refresh_token ? encrypt(account.refresh_token) : null,
-                  expires_at: account.expires_at,
-                  scope: account.scope,
-                  token_type: account.token_type,
-                  id_token: account.id_token,
-                },
-              });
-
-              await tx.user.update({
-                where: { id: user.id },
-                data: { revokedAt: null },
-              });
+          await prisma.$transaction(async (tx) => {
+            await tx.account.updateMany({
+              where: { userId: user.id, provider: 'github' },
+              data: {
+                access_token: account.access_token ? encrypt(account.access_token) : undefined,
+                refresh_token: account.refresh_token ? encrypt(account.refresh_token) : undefined,
+                expires_at: account.expires_at ?? undefined,
+                scope: account.scope ?? undefined,
+                token_type: account.token_type ?? undefined,
+                id_token: account.id_token ?? undefined,
+              },
             });
-          }
+
+            await tx.user.update({
+              where: { id: user.id },
+              data: {
+                githubId: account.providerAccountId,
+                revokedAt:
+                  existingUser?.revokedAt !== null && existingUser?.revokedAt !== undefined
+                    ? null
+                    : undefined,
+              },
+            });
+          });
         } catch (error) {
-          console.error('Failed to handle re-authentication:', error);
+          console.error('Failed to persist GitHub tokens:', error);
+          return false;
         }
       }
       return true;
     },
 
     async jwt({ token, account }) {
-      if (account) {
+      if (account?.access_token) {
         token.accessToken = account.access_token;
         return token;
       }

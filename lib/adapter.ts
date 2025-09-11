@@ -19,12 +19,17 @@ export function EncryptedPrismaAdapter(prisma: PrismaClient) {
         token_type: account.token_type as Lowercase<string> | undefined,
       };
 
-      if (accountToStore.access_token) {
-        accountToStore.access_token = encrypt(accountToStore.access_token);
-      }
+      try {
+        if (accountToStore.access_token) {
+          accountToStore.access_token = encrypt(accountToStore.access_token);
+        }
 
-      if (accountToStore.refresh_token) {
-        accountToStore.refresh_token = encrypt(accountToStore.refresh_token);
+        if (accountToStore.refresh_token) {
+          accountToStore.refresh_token = encrypt(accountToStore.refresh_token);
+        }
+      } catch (error) {
+        console.error('Failed to encrypt tokens for account linking:', error);
+        throw error;
       }
 
       return base.linkAccount!(accountToStore);
@@ -113,6 +118,9 @@ export async function getDecryptedTokensForUser(
     where: {
       userId,
       provider,
+    },
+    orderBy: {
+      id: 'desc',
     },
   });
 

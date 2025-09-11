@@ -1,18 +1,11 @@
 import { getSession } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { GitHubRepositoryResponse, Repository } from '@/types/share';
+import { getDecryptedTokensForUser } from '@/lib/adapter';
+import prisma from '@/lib/prisma';
 
 async function getUserRepos(accessToken: string, userId: string): Promise<Repository[]> {
   try {
-    // const response = await fetch(
-    //   `https://api.github.com/orgs/devhub-hq/repos?type=all`,
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${accessToken}`,
-    //       'Content-Type': 'application/json',
-    //     },
-    //   }
-    // );
     const response = await fetch(`https://api.github.com/user/repos?type=private`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
