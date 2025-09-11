@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { getValidatedSession } from '@/lib/auth';
 import { Share } from '@prisma/client';
 
 interface CreateShareRequest {
@@ -46,30 +46,35 @@ async function updateShare(id: string, updates: Partial<Share>, userId: string):
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const session = await getSession();
+  const session = await getValidatedSession();
 
-  if (!session) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { repoName, repoOwner, viewLimit, expiresAt, sharedWith } = await request.json();
   if (!repoName || !repoOwner) {
     return NextResponse.json({ error: 'Repo name and repo owner are required' }, { status: 400 });
   }
-  const shareId = await createShare({
-    userId: session.user.id,
-    repoName,
-    repoOwner,
-    viewLimit,
-    expiresAt,
-    sharedWith,
-  });
-
-  return NextResponse.json({ shareId }, { status: 201 });
+  try {
+    const shareId = await createShare({
+      userId: session.user.id,
+      repoName,
+      repoOwner,
+      viewLimit,
+      expiresAt,
+      sharedWith,
+    });
+    return NextResponse.json({ shareId }, { status: 201 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to create share';
+    const status = message.includes('User not found') ? 401 : 500;
+    return NextResponse.json({ error: message }, { status });
+  }
 }
 
 export async function PATCH(request: NextRequest): Promise<NextResponse> {
-  const session = await getSession();
-  if (!session) {
+  const session = await getValidatedSession();
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { id, expiresAt, viewLimit } = await request.json();
@@ -85,8 +90,8 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await getSession();
-  if (!session) {
+  const session = await getValidatedSession();
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const shareId = req.nextUrl.searchParams.get('shareId');

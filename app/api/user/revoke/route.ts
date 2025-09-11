@@ -35,7 +35,23 @@ export async function POST(): Promise<NextResponse> {
       });
     });
 
-    return NextResponse.json({ success: true });
+    const res = NextResponse.json({ success: true });
+
+    const cookieNames = [
+      'next-auth.session-token',
+      'next-auth.csrf-token',
+      '__Secure-next-auth.session-token',
+      '__Secure-next-auth.csrf-token',
+    ];
+    const past = new Date(0).toUTCString();
+    for (const name of cookieNames) {
+      res.headers.append(
+        'Set-Cookie',
+        `${name}=; Path=/; Expires=${past}; Max-Age=0; HttpOnly; SameSite=Lax`
+      );
+    }
+
+    return res;
   } catch (error) {
     console.error('Failed to revoke GitHub access:', error);
     return NextResponse.json({ error: 'Failed to revoke access' }, { status: 500 });

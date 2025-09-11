@@ -1,8 +1,6 @@
 import { getSession } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { GitHubRepositoryResponse, Repository } from '@/types/share';
-import { getDecryptedTokensForUser } from '@/lib/adapter';
-import prisma from '@/lib/prisma';
 
 async function getUserRepos(accessToken: string, userId: string): Promise<Repository[]> {
   try {
