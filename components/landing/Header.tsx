@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function Header() {
   return (
@@ -17,6 +18,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Link
             href="https://github.com/kalpaniks/prepoview"
             target="_blank"
