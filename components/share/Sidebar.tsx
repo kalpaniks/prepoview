@@ -229,7 +229,7 @@ export default function Sidebar({
 }: SidebarProps) {
   return (
     <div
-      className={`border-border/60 bg-card fixed inset-y-0 left-0 z-50 w-72 transform overflow-y-auto border-r transition-transform duration-200 ease-out md:static md:translate-x-0 ${
+      className={`border-border/60 bg-card fixed inset-y-0 left-0 z-50 w-72 transform overflow-y-auto border-r transition-transform duration-200 ease-out md:static md:h-full md:translate-x-0 ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
