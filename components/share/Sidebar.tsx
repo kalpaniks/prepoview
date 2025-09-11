@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Activity, GitBranch, Clock, Shield } from 'lucide-react';
+import { Users, Activity, GitBranch, Clock, Shield, X } from 'lucide-react';
 import type { GitHubProfile, ShareAnalytics, Share } from '@/types/share';
 import { truncateEmail, isExpiringSoon } from '@/utils/share/helpers';
 import Image from 'next/image';
@@ -12,6 +12,8 @@ interface SidebarProps {
   analytics?: ShareAnalytics;
   isLoading: boolean;
   isFetching: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 function GitHubProfileSection({
@@ -222,9 +224,23 @@ export default function Sidebar({
   },
   isLoading,
   isFetching,
+  isOpen = false,
+  onClose,
 }: SidebarProps) {
   return (
-    <div className="border-border/60 bg-card/30 w-72 overflow-y-auto border-r">
+    <div
+      className={`border-border/60 bg-card fixed inset-y-0 left-0 z-50 w-72 transform overflow-y-auto border-r transition-transform duration-200 ease-out md:static md:translate-x-0 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}
+    >
+      {onClose && (
+        <div className="absolute top-3 right-3 md:hidden">
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close sidebar">
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+      )}
+
       <div className="flex h-full flex-col space-y-6 p-6">
         <GitHubProfileSection profile={profile} isLoading={isLoading} isFetching={isFetching} />
         <div className="border-border/50 border-t" />

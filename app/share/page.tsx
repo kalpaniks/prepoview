@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { Shield } from 'lucide-react';
+import { Shield, Menu } from 'lucide-react';
 import { useRepositorySearch } from '@/hooks/use-repository-search';
 import { useShareManagement } from '@/hooks/use-share-management';
 import Sidebar from '@/components/share/Sidebar';
@@ -16,18 +16,26 @@ import { useGithubProfileQuery, useReposQuery } from '@/hooks/queries';
 import { useShareAnalytics } from '@/hooks/use-share-analytics';
 import { revokeGithubAccess } from '@/lib/api/user';
 import { signOut } from 'next-auth/react';
+import { useMobile } from '@/hooks/use-mobile';
 
 function DashboardHeader({
   onRevokeAll,
   isDeletingAllShares,
+  onOpenSidebar,
 }: {
   onRevokeAll: () => void;
   isDeletingAllShares: boolean;
+  onOpenSidebar: () => void;
 }) {
   return (
     <div className="border-border/60 bg-card/40 border-b px-6 py-4">
-      <div className="flex items-center justify-end">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between">
+        <div className="md:hidden">
+          <Button variant="ghost" size="icon" onClick={onOpenSidebar} aria-label="Open sidebar">
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
           <Button
             variant="ghost"
@@ -49,6 +57,8 @@ export default function SharePage() {
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isConfirmRevokeAllOpen, setIsConfirmRevokeAllOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const isMobile = useMobile();
   const {
     data: repos,
     isLoading: isReposLoading,
@@ -65,6 +75,10 @@ export default function SharePage() {
   } = useGithubProfileQuery();
 
   const analytics = useShareAnalytics(shareManagement.shares);
+
+  useEffect(() => {
+    if (!isMobile) setIsSidebarOpen(false);
+  }, [isMobile]);
 
   const openShareDialog = useCallback((repository: Repository) => {
     setSelectedRepo(repository);
@@ -90,17 +104,30 @@ export default function SharePage() {
 
   return (
     <div className="bg-background flex h-screen">
-      <Sidebar
-        profile={githubProfile}
-        analytics={analytics}
-        isLoading={isGithubProfileLoading}
-        isFetching={isGithubProfileFetching}
-      />
+      <div className="w-0 md:w-72 md:flex-shrink-0">
+        <Sidebar
+          profile={githubProfile}
+          analytics={analytics}
+          isLoading={isGithubProfileLoading}
+          isFetching={isGithubProfileFetching}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      </div>
+
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader
           onRevokeAll={handleRevokeAllShares}
           isDeletingAllShares={shareManagement.isDeletingAllShares}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
         />
 
         <div className="flex-1 space-y-6 overflow-auto p-6">

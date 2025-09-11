@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Editor as MonacoEditor } from '@monaco-editor/react';
-import { File, Loader2 } from 'lucide-react';
+import { File, Loader2, SidebarOpen } from 'lucide-react';
 import type { editor as MonacoEditorNS, IKeyboardEvent } from 'monaco-editor';
+import { useMobile } from '@/hooks/use-mobile';
 
 interface CodeEditorProps {
   shareId: string;
   selectedFile: string | null;
+  onSidebarOpen: () => void;
 }
 
 interface FileContent {
@@ -236,12 +238,12 @@ const useTheme = () => {
   return isDark;
 };
 
-export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
+export default function Editor({ shareId, selectedFile, onSidebarOpen }: CodeEditorProps) {
   const [fileContent, setFileContent] = useState<FileContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const isDarkTheme = useTheme();
-
+  const isMobile = useMobile();
   const handleContainerKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     const isCombo = e.ctrlKey || e.metaKey;
     const code = e.keyCode;
@@ -340,6 +342,15 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
   if (!selectedFile) {
     return (
       <div className="bg-bg-default flex h-full flex-col">
+        {isMobile && (
+          <div className="border-border-default bg-bg-default border-b px-4 py-3">
+            <div className="flex items-center justify-start">
+              <SidebarOpen className="text-fg-muted mr-2 h-4 w-4" onClick={onSidebarOpen} />
+              {/* <File className="text-fg-muted mr-2 h-4 w-4" /> */}
+              <span className="text-fg-default text-sm font-medium">No file selected</span>
+            </div>
+          </div>
+        )}
         <div className="flex h-full items-center justify-center">
           <div className="text-center">
             <File className="text-fg-muted mx-auto mb-4 h-16 w-16 opacity-30" />
@@ -416,6 +427,7 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
       <div className="border-border-default bg-bg-default border-b px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
+            <SidebarOpen className="text-fg-muted sm: mr-2 h-4 w-4" onClick={onSidebarOpen} />
             <File className="text-fg-muted mr-2 h-4 w-4" />
             <span className="text-fg-default text-sm font-medium">{fileContent?.name}</span>
           </div>
@@ -430,7 +442,6 @@ export default function Editor({ shareId, selectedFile }: CodeEditorProps) {
           </div>
         </div>
       </div>
-
       {/* Monaco Editor with GitHub theme */}
       <div className="relative flex-1">
         <MonacoEditor

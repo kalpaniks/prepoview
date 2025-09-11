@@ -2,6 +2,7 @@ import EditorViewLayout from '@/components/editor/EditorViewLayout';
 import { Github, Calendar, FileText } from 'lucide-react';
 import { getShareDetails } from '@/lib/share';
 import Link from 'next/link';
+// import { useMobile } from '@/hooks/use-mobile';
 
 interface SharePageProps {
   params: Promise<{ shareId: string }>;
@@ -24,6 +25,7 @@ async function getShare(shareId: string) {
 export default async function SharePage({ params }: SharePageProps) {
   const { shareId } = await params;
   const shareData = await getShare(shareId);
+  // const isMobile = useMobile();
   if (!shareData) {
     return <div>Share not found</div>;
   }
@@ -49,16 +51,18 @@ export default async function SharePage({ params }: SharePageProps) {
                   </span>
                 </nav>
 
-                <span className="border-border-default bg-bg-muted text-fg-muted inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium">
+                {/* {!isMobile && ( */}
+                <span className="border-border-default bg-bg-muted text-fg-muted hidden items-center rounded-full border px-2 py-1 text-xs font-medium sm:inline-flex">
                   Private
                 </span>
+                {/* )} */}
               </div>
             </div>
 
-            <div className="text-fg-muted flex flex-col items-end text-sm">
+            <div className="text-fg-muted hidden flex-col items-end text-sm sm:flex">
               <div className="mb-1 flex items-center space-x-2">
                 <Calendar className="h-4 w-4" />
-                <span>Shared {new Date(shareData.createdAt).toLocaleDateString()}</span>
+                <span> {new Date(shareData.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
