@@ -7,9 +7,35 @@ export async function POST(): Promise<NextResponse> {
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
   try {
-    await prisma.account.deleteMany({ where: { userId: session.user.id, provider: 'github' } });
-    await prisma.share.deleteMany({ where: { userId: session.user.id } });
+    await prisma.$transaction(async (tx) => {
+      await tx.account.updateMany({
+        where: { userId: session.user.id, provider: 'github' },
+        data: {
+          access_token: null,
+          refresh_token: null,
+          id_token: null,
+          expires_at: null,
+          scope: null,
+          token_type: null,
+        },
+      });
+
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: {
+          accessToken: null,
+          githubId: null,
+          revokedAt: new Date(),
+        },
+      });
+
+      await tx.share.deleteMany({
+        where: { userId: session.user.id },
+      });
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to revoke GitHub access:', error);

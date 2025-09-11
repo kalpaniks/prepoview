@@ -20,11 +20,11 @@ import { useMobile } from '@/hooks/use-mobile';
 
 function DashboardHeader({
   onRevokeAll,
-  isDeletingAllShares,
+  isRevoking,
   onOpenSidebar,
 }: {
   onRevokeAll: () => void;
-  isDeletingAllShares: boolean;
+  isRevoking: boolean;
   onOpenSidebar: () => void;
 }) {
   return (
@@ -42,7 +42,7 @@ function DashboardHeader({
             size="sm"
             onClick={onRevokeAll}
             className="text-destructive hover:text-destructive"
-            disabled={isDeletingAllShares}
+            disabled={isRevoking}
           >
             <Shield className="mr-2 h-4 w-4" />
             Revoke Access Token
@@ -58,6 +58,7 @@ export default function SharePage() {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isConfirmRevokeAllOpen, setIsConfirmRevokeAllOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isRevoking, setIsRevoking] = useState(false);
   const isMobile = useMobile();
   const {
     data: repos,
@@ -96,10 +97,12 @@ export default function SharePage() {
 
   const confirmRevokeAllShares = useCallback(async () => {
     try {
+      setIsRevoking(true);
       await revokeGithubAccess();
-      setIsConfirmRevokeAllOpen(false);
       await signOut({ callbackUrl: '/' });
-    } catch (e) {}
+    } catch {
+      setIsRevoking(false);
+    }
   }, []);
 
   return (
@@ -126,7 +129,7 @@ export default function SharePage() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader
           onRevokeAll={handleRevokeAllShares}
-          isDeletingAllShares={shareManagement.isDeletingAllShares}
+          isRevoking={isRevoking}
           onOpenSidebar={() => setIsSidebarOpen(true)}
         />
 
@@ -167,7 +170,7 @@ export default function SharePage() {
         isOpen={isConfirmRevokeAllOpen}
         onClose={() => setIsConfirmRevokeAllOpen(false)}
         onConfirm={confirmRevokeAllShares}
-        isLoading={false}
+        isLoading={isRevoking}
         title="Revoke GitHub Access Token?"
         description="This will remove the stored GitHub credentials and sign you out. You can reconnect later from login."
         confirmLabel="Revoke & Sign Out"

@@ -31,7 +31,7 @@ export default function ConfirmationDialog({
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        if (!isLoading) onClose();
+        if (!open && !isLoading) onClose();
       }}
     >
       <DialogContent>

@@ -17,6 +17,7 @@ model User {
   image          String?
   githubId       String?   @unique
   accessToken    String?
+  revokedAt      DateTime?
   createdAt      DateTime  @default(now())
   accounts       Account[]
   shares         Share[]
@@ -52,7 +53,7 @@ model Share{
     sharedWith String?
     expiresAt DateTime?
     createdAt DateTime @default(now())
-    user User   @relation(fields: [userId], references: [id])
+    user User   @relation(fields: [userId], references: [id], onDelete: Cascade)
     ViewerSession ViewerSession[]
 
     @@index([userId, createdAt])
