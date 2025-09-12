@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="border-border/60 bg-card/30 border-t">
       <div className="text-muted-foreground mx-auto flex w-full items-center justify-between px-4 py-4 text-xs sm:px-6">
         <div className="flex items-center gap-2">
-          <span>© {new Date().getFullYear()} PrepoView</span>
+          <span>© {new Date().getFullYear()} Repofyi</span>
           <span className="hidden sm:inline">•</span>
           <span className="hidden sm:inline">Built with security in mind</span>
         </div>

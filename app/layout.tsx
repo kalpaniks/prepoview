@@ -26,7 +26,7 @@ export const metadata: Metadata = {
       },
     ],
   },
-  title: 'Prepoview',
+  title: 'Repofyi',
   description: 'Share private repos read‑only with time & view limits',
   other: {
     'color-scheme': 'light dark',

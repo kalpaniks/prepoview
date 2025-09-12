@@ -15,7 +15,7 @@ export default function LegalPage() {
             </h2>
             <div className="text-muted-foreground space-y-3 text-base">
               <p>
-                <strong>Service scope.</strong> PrepoView lets you share read-only views of private
+                <strong>Service scope.</strong> Repofyi lets you share read-only views of private
                 GitHub repositories you explicitly authorize. Access is time-boxed and view-limited.
               </p>
               <p>
