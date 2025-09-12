@@ -14,7 +14,7 @@ export default function Header() {
               />
             </svg>
           </div>
-          <span className="text-md font-semibold tracking-tight">Prepoview</span>
+          <span className="text-md font-semibold tracking-tight">Repofyi</span>
         </div>
 
         <div className="flex items-center gap-2">
