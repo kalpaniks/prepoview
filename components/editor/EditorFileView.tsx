@@ -304,7 +304,6 @@ export default function Editor({ shareId, selectedFile, onSidebarOpen }: CodeEdi
 
         const data = await response.json();
 
-        // Decode base64 content if needed
         let decodedContent = data.content;
         if (data.encoding === 'base64') {
           try {

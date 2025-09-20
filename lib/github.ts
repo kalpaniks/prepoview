@@ -1,3 +1,5 @@
+import path from 'path';
+
 export async function getTree(repoName: string, repoOwner: string, accessToken: string) {
   const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
     headers: {
@@ -47,7 +49,17 @@ export async function getFile(
       },
     }
   );
-  return response.json();
+  const data = await response.json();
+  const res = {
+    name: data.name,
+    path: data.path,
+    sha: data.sha,
+    content: data.content,
+    size: data.size,
+    type: data.type,
+    encoding: data.encoding,
+  };
+  return res;
 }
 
 export async function getBaseTree(repoName: string, repoOwner: string, accessToken: string) {

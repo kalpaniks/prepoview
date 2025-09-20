@@ -1,5 +1,7 @@
 # Prepoview – Share private repos, read‑only
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kalpaniks/prepoview)
+
 Prepoview lets you share time‑boxed, read‑only access to your private GitHub repositories without adding collaborators. Enforce expiration and view limits; no downloads.
 
 - Encrypted OAuth tokens at rest – never stored in plaintext
