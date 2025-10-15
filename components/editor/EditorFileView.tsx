@@ -5,6 +5,7 @@ import { Editor as MonacoEditor } from '@monaco-editor/react';
 import { File, Loader2, SidebarOpen } from 'lucide-react';
 import type { editor as MonacoEditorNS, IKeyboardEvent } from 'monaco-editor';
 import { useMobile } from '@/hooks/use-mobile';
+import MarkdownViewer from './MarkdownViewer';
 
 interface CodeEditorProps {
   shareId: string;
@@ -222,6 +223,11 @@ const getLineCount = (content: string): number => {
   return content.split('\n').length;
 };
 
+const isMarkdownFile = (filePath: string): boolean => {
+  const extension = filePath.split('.').pop()?.toLowerCase();
+  return extension === 'md' || extension === 'markdown';
+};
+
 const useTheme = () => {
   const [isDark, setIsDark] = useState<boolean>(false);
 
@@ -413,6 +419,14 @@ export default function Editor({ shareId, selectedFile, onSidebarOpen }: CodeEdi
 
   const language = getLanguageFromPath(selectedFile);
   const lineCount = fileContent?.content ? getLineCount(fileContent.content) : 0;
+  const isMarkdown = isMarkdownFile(selectedFile);
+
+  // If it's a markdown file, render the MarkdownViewer component
+  if (isMarkdown && fileContent) {
+    return (
+      <MarkdownViewer content={fileContent.content} fileName={fileContent.name} />
+    );
+  }
 
   return (
     <div
