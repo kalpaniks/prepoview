@@ -210,6 +210,12 @@ const getLanguageFromPath = (filePath: string): string => {
   return languageMap[extension || ''] || 'plaintext';
 };
 
+const isImageFile = (filePath: string): boolean => {
+  const extension = filePath.split('.').pop()?.toLowerCase();
+  const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'webp', 'ico', 'tiff', 'tif'];
+  return imageExtensions.includes(extension || '');
+};
+
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 bytes';
   const k = 1024;
@@ -305,7 +311,8 @@ export default function Editor({ shareId, selectedFile, onSidebarOpen }: CodeEdi
         const data = await response.json();
 
         let decodedContent = data.content;
-        if (data.encoding === 'base64') {
+        // Don't decode base64 for images, keep them as base64
+        if (data.encoding === 'base64' && !isImageFile(filePath)) {
           try {
             decodedContent = decodeURIComponent(escape(atob(data.content)));
           } catch {
@@ -413,6 +420,50 @@ export default function Editor({ shareId, selectedFile, onSidebarOpen }: CodeEdi
 
   const language = getLanguageFromPath(selectedFile);
   const lineCount = fileContent?.content ? getLineCount(fileContent.content) : 0;
+  const isImage = isImageFile(selectedFile);
+
+  // If it's an image file, render image viewer instead of code editor
+  if (isImage && fileContent) {
+    const imageUrl = `data:image/${selectedFile.split('.').pop()};base64,${fileContent.content}`;
+    
+    return (
+      <div
+        className="bg-bg-default flex h-full flex-col"
+        onContextMenu={handleContextMenu}
+      >
+        {/* GitHub-style file header */}
+        <div className="border-border-default bg-bg-default border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <SidebarOpen className="text-fg-muted sm: mr-2 h-4 w-4" onClick={onSidebarOpen} />
+              <File className="text-fg-muted mr-2 h-4 w-4" />
+              <span className="text-fg-default text-sm font-medium">{fileContent?.name}</span>
+            </div>
+
+            {/* GitHub-style file stats */}
+            <div className="text-fg-muted flex items-center space-x-4 text-xs">
+              {fileContent?.size && <span>{formatFileSize(fileContent.size)}</span>}
+              <span className="bg-bg-muted text-fg-default rounded px-2 py-1 font-mono text-xs">
+                Image
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Image viewer */}
+        <div className="flex flex-1 items-center justify-center overflow-auto p-8">
+          <div className="max-w-full">
+            <img
+              src={imageUrl}
+              alt={fileContent.name}
+              className="max-h-[80vh] max-w-full rounded border border-border-default shadow-lg"
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
