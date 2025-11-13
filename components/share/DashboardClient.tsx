@@ -59,15 +59,23 @@ export default function DashboardClient() {
   const [isConfirmRevokeAllOpen, setIsConfirmRevokeAllOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRevoking, setIsRevoking] = useState(false);
+  const [reposPage, setReposPage] = useState(1);
   const isMobile = useMobile();
   const {
-    data: repos,
+    data: reposData,
     isLoading: isReposLoading,
     isFetching: isReposFetching,
     isError: isReposError,
-  } = useReposQuery();
+  } = useReposQuery(reposPage, 10);
   const shareManagement = useShareManagement();
-  const repositorySearch = useRepositorySearch(repos ?? []);
+  const repos = reposData?.repos ?? [];
+  const repositorySearch = useRepositorySearch(repos);
+
+  useEffect(() => {
+    if (repositorySearch.hasSearchQuery && reposPage !== 1) {
+      setReposPage(1);
+    }
+  }, [repositorySearch.hasSearchQuery]);
 
   const {
     data: githubProfile,
@@ -146,7 +154,12 @@ export default function DashboardClient() {
             availableLanguages={repositorySearch.availableLanguages}
             hasSearchQuery={repositorySearch.hasSearchQuery}
             filteredRepositories={repositorySearch.filteredRepositories}
+            allRepositories={repositorySearch.allRepositories}
             onRepositoryShare={openShareDialog}
+            page={reposPage}
+            hasMore={reposData?.hasMore ?? false}
+            totalRepositories={reposData?.total}
+            onPageChange={setReposPage}
           />
 
           <ShareTable

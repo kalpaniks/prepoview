@@ -14,6 +14,7 @@ import {
 import { Search, Filter, ChevronDown, Clock, ArrowUpDown, FileText, GitBranch } from 'lucide-react';
 import type { Repository } from '@/types/share';
 import RepositorySearchResult from './RepositorySearchResult';
+import AllRepositoriesList from './AllRepositoriesList';
 import { Skeleton } from '../ui/skeleton';
 
 interface RepositorySearchSectionProps {
@@ -28,8 +29,13 @@ interface RepositorySearchSectionProps {
   availableLanguages: string[];
   hasSearchQuery: boolean;
   filteredRepositories: Repository[];
+  allRepositories: Repository[];
   onRepositoryShare: (repository: Repository) => void;
   isFetching: boolean;
+  page: number;
+  hasMore: boolean;
+  totalRepositories?: number;
+  onPageChange: (page: number) => void;
 }
 
 function SearchEmptyState() {
@@ -41,7 +47,7 @@ function SearchEmptyState() {
       </div>
       <h3 className="mb-3 text-xl font-semibold">Find repositories to share</h3>
       <p className="text-muted-foreground mx-auto mb-6 max-w-lg text-sm leading-relaxed">
-        Start typing to search through your private repositories. You can search by repository name,
+        Start typing to search through your repositories. You can search by repository name,
         description, programming language, or the team that owns it.
       </p>
       <div className="text-muted-foreground flex items-center justify-center gap-6 text-xs">
@@ -193,9 +199,14 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
     availableLanguages,
     hasSearchQuery,
     filteredRepositories,
+    allRepositories,
     onRepositoryShare,
     isLoading,
     isFetching,
+    page,
+    hasMore,
+    totalRepositories,
+    onPageChange,
   } = props;
 
   return (
@@ -218,23 +229,40 @@ export default function RepositorySearchSection(props: RepositorySearchSectionPr
             />
           </div>
 
-          {hasSearchQuery && (
-            <SearchFilterControls
-              onSortChange={onSortChange}
-              onLanguageFilterChange={onLanguageFilterChange}
-              availableLanguages={availableLanguages}
-            />
-          )}
+          <SearchFilterControls
+            onSortChange={onSortChange}
+            onLanguageFilterChange={onLanguageFilterChange}
+            availableLanguages={availableLanguages}
+          />
         </div>
 
-        <SearchResults
-          hasSearchQuery={hasSearchQuery}
-          filteredRepositories={filteredRepositories}
-          languageFilter={languageFilter}
-          onRepositoryShare={onRepositoryShare}
-          isLoading={isLoading}
-          isFetching={isFetching}
-        />
+        {!hasSearchQuery && totalRepositories !== undefined && (
+          <div className="text-muted-foreground text-sm">
+            {totalRepositories} {totalRepositories === 1 ? 'repository' : 'repositories'} you have
+          </div>
+        )}
+
+        {hasSearchQuery ? (
+          <SearchResults
+            hasSearchQuery={hasSearchQuery}
+            filteredRepositories={filteredRepositories}
+            languageFilter={languageFilter}
+            onRepositoryShare={onRepositoryShare}
+            isLoading={isLoading}
+            isFetching={isFetching}
+          />
+        ) : (
+          <AllRepositoriesList
+            repositories={allRepositories}
+            onRepositoryShare={onRepositoryShare}
+            isLoading={isLoading}
+            isFetching={isFetching}
+            page={page}
+            hasMore={hasMore}
+            onPageChange={onPageChange}
+            languageFilter={languageFilter}
+          />
+        )}
       </CardContent>
     </Card>
   );

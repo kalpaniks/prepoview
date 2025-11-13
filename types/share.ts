@@ -156,3 +156,14 @@ export type RepositorySortOption = 'name' | 'updated' | 'size';
  * Share status types
  */
 export type ShareStatus = 'active' | 'expired' | 'revoked';
+
+/**
+ * Paginated repositories response
+ */
+export interface PaginatedRepositories {
+  repos: Repository[];
+  page: number;
+  perPage: number;
+  hasMore: boolean;
+  total?: number;
+}

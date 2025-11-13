@@ -28,6 +28,25 @@ export function useRepositorySearch(repositories: Repository[]) {
   }, [repositories, searchQuery, sortBy, languageFilter]);
 
   /**
+   * All repositories list (when no search query)
+   * Filtered by language and sorted by selected sort option
+   */
+  const allRepositories = useMemo(() => {
+    if (searchQuery.trim()) {
+      return [];
+    }
+
+    let filtered = repositories;
+    if (languageFilter !== 'all') {
+      filtered = filtered.filter((repo) => repo.language === languageFilter);
+    }
+
+    const sorted = sortRepositories(filtered, sortBy);
+
+    return sorted;
+  }, [repositories, searchQuery, sortBy, languageFilter]);
+
+  /**
    * Available languages for filtering
    */
   const availableLanguages = useMemo(() => {
@@ -56,6 +75,7 @@ export function useRepositorySearch(repositories: Repository[]) {
     hasSearchQuery,
     // Computed
     filteredRepositories: filteredAndSortedRepositories,
+    allRepositories,
     availableLanguages,
     // Actions
     setSearchQuery,

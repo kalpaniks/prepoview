@@ -1,7 +1,10 @@
-import { Repository } from '@/types/share';
+import { PaginatedRepositories } from '@/types/share';
 
-export async function fetchUserRepos() {
-  const response = await fetch(`/api/user/repos`, {
+export async function fetchUserRepos(
+  page: number = 1,
+  perPage: number = 10
+): Promise<PaginatedRepositories> {
+  const response = await fetch(`/api/user/repos?page=${page}&perPage=${perPage}`, {
     credentials: 'include',
   });
 
@@ -9,7 +12,7 @@ export async function fetchUserRepos() {
     throw new Error('Failed to fetch user repos');
   }
   const data = await response.json();
-  return data as Repository[];
+  return data as PaginatedRepositories;
 }
 
 export async function fetchGithubProfile() {

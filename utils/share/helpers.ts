@@ -77,7 +77,9 @@ export function sortRepositories(
       case 'name':
         return a.name.localeCompare(b.name);
       case 'updated':
-        return a.id - b.id;
+        const aDate = a.pushedAt ? new Date(a.pushedAt).getTime() : new Date(a.updatedAt).getTime();
+        const bDate = b.pushedAt ? new Date(b.pushedAt).getTime() : new Date(b.updatedAt).getTime();
+        return bDate - aDate;
       case 'size':
         const aSize = parseFloat(a.size.toString());
         const bSize = parseFloat(b.size.toString());
