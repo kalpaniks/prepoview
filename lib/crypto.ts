@@ -1,6 +1,13 @@
 import crypto from 'crypto';
 
-const key = Buffer.from(process.env.ENCRYPTION_KEY!, 'hex');
+const envKey = process.env.ENCRYPTION_KEY;
+if (!envKey) {
+  throw new Error("ENCRYPTION_KEY environment variable is not defined");
+}
+
+const key = /^[0-9a-fA-F]{64}$/.test(envKey)
+  ? Buffer.from(envKey, 'hex')
+  : crypto.createHash('sha256').update(envKey).digest();
 
 export function encrypt(text: string): string {
   const iv = crypto.randomBytes(16);
